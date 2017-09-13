@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Cluster">
+      <UniqueIdentifier>{41bf3450-2aea-4121-8658-5ddcfd649e7e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\ccbc_context.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\Cluster.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\ClusterDB.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\Clustering.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\ClusterProperties.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\Comparison.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="MfcClusterDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\NFieldBase.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\ToString.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\EigenVal.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\ColumnTreeCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\mlc_context.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\std_plugin.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\matrix_context.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\TaskMap.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\Wait.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\Task.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\boost_plugin.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\Toolbox.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="Optimizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OptionDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Point.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Clustering\gclust_context.h">
+      <Filter>Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="MfcCluster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MfcClusterDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\ccbc_context.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\Cluster.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\ClusterDB.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\Clustering.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\ClusterProperties.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\Comparison.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\NFieldBase.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\ToString.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\EigenVal.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\ColumnTreeCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\mlc_context.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\double_vector.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\double_matrix.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\std_plugin.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\matrix_context.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\TaskMap.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\Wait.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\Task.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\boost_plugin.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\Toolbox.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="Optimizer.cpp">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Clustering\gclust_context.cpp">
+      <Filter>Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="MfcCluster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MfcCluster.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\MfcCluster.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\MfcCluster.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\TREEBTNS.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Start.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\start1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,1 @@
+./cluster -input "/home/ClusterLinux/DIVE MAC/example.fasta" -output "/home/ClusterLinux/DIVE MAC/output.clus" -thresholds [0.45] -algorithm SLC -nameposition 1 -exportmatrix false

@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="100">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <logicalFolder name="Clustering" displayName="Clustering" projectFiles="true">
+        <itemPath>src/MLC/Clustering/boost_plugin.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/boost_plugin.h</itemPath>
+        <itemPath>src/MLC/Clustering/ccbc_context.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/ccbc_context.h</itemPath>
+        <itemPath>src/MLC/Clustering/cluster.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/cluster.h</itemPath>
+        <itemPath>src/MLC/Clustering/cluster_context.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/cluster_context.h</itemPath>
+        <itemPath>src/MLC/Clustering/clusterdb.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/clusterdb.h</itemPath>
+        <itemPath>src/MLC/Clustering/clustering.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/clustering.h</itemPath>
+        <itemPath>src/MLC/Clustering/clusterproperties.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/clusterproperties.h</itemPath>
+        <itemPath>src/MLC/Clustering/comparison.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/comparison.h</itemPath>
+        <itemPath>src/MLC/Clustering/double_matrix.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/double_matrix.h</itemPath>
+        <itemPath>src/MLC/Clustering/double_vector.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/double_vector.h</itemPath>
+        <itemPath>src/MLC/Clustering/eigenval.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/eigenval.h</itemPath>
+        <itemPath>src/MLC/Clustering/log.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/log.h</itemPath>
+        <itemPath>src/MLC/Clustering/matrix_context.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/matrix_context.h</itemPath>
+        <itemPath>src/MLC/Clustering/matrixtpl.h</itemPath>
+        <itemPath>src/MLC/Clustering/mlc_context.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/mlc_context.h</itemPath>
+        <itemPath>src/MLC/Clustering/nfieldbase.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/nfieldbase.h</itemPath>
+        <itemPath>src/MLC/Clustering/std_plugin.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/std_plugin.h</itemPath>
+        <itemPath>src/MLC/Clustering/task.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/task.h</itemPath>
+        <itemPath>src/MLC/Clustering/taskmap.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/taskmap.h</itemPath>
+        <itemPath>src/MLC/Clustering/toolbox.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/toolbox.h</itemPath>
+        <itemPath>src/MLC/Clustering/toolbox_tl.h</itemPath>
+        <itemPath>src/MLC/Clustering/tostring.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/tostring.h</itemPath>
+        <itemPath>src/MLC/Clustering/uclust_context.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/uclust_context.h</itemPath>
+        <itemPath>src/MLC/Clustering/wait.cpp</itemPath>
+        <itemPath>src/MLC/Clustering/wait.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="MfcCluster" displayName="MfcCluster" projectFiles="true">
+        <logicalFolder name="res" displayName="res" projectFiles="true">
+          <itemPath>src/MLC/MfcCluster/res/MfcCluster.ico</itemPath>
+          <itemPath>src/MLC/MfcCluster/res/MfcCluster.rc2</itemPath>
+          <itemPath>src/MLC/MfcCluster/res/Start.ico</itemPath>
+          <itemPath>src/MLC/MfcCluster/res/TREEBTNS.bmp</itemPath>
+          <itemPath>src/MLC/MfcCluster/res/start1.ico</itemPath>
+        </logicalFolder>
+        <itemPath>src/MLC/MfcCluster/consoleappentrypoint.cpp</itemPath>
+        <itemPath>src/MLC/MfcCluster/mfcclusterbusiness.cpp</itemPath>
+        <itemPath>src/MLC/MfcCluster/mfcclusterbusiness.h</itemPath>
+        <itemPath>src/MLC/MfcCluster/optimizer.cpp</itemPath>
+        <itemPath>src/MLC/MfcCluster/optimizer.h</itemPath>
+        <itemPath>src/MLC/MfcCluster/point.h</itemPath>
+        <itemPath>src/MLC/MfcCluster/readme.txt</itemPath>
+        <itemPath>src/MLC/MfcCluster/resource.h</itemPath>
+        <itemPath>src/MLC/MfcCluster/testfieldbase.cpp</itemPath>
+        <itemPath>src/MLC/MfcCluster/testfieldbase.h</itemPath>
+      </logicalFolder>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>src</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <incDir>
+            <pElem>src/Eigen323</pElem>
+          </incDir>
+        </cTool>
+        <ccTool>
+          <standard>8</standard>
+          <incDir>
+            <pElem>src/Eigen323</pElem>
+          </incDir>
+          <commandLine>-pthread -DBOOST_SYSTEM_NO_DEPRECATED -lboost_system</commandLine>
+        </ccTool>
+      </compileType>
+      <item path="src/MLC/Clustering/boost_plugin.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/boost_plugin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/ccbc_context.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/ccbc_context.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/cluster.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/cluster.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/cluster_context.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/cluster_context.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clusterdb.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clusterdb.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clustering.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clustering.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clusterproperties.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clusterproperties.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/comparison.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/comparison.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/double_matrix.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/double_matrix.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/double_vector.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/double_vector.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/eigenval.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/eigenval.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/log.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/log.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/matrix_context.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/matrix_context.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/matrixtpl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/mlc_context.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/mlc_context.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/nfieldbase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/nfieldbase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/std_plugin.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/std_plugin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/task.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/task.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/taskmap.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/taskmap.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/toolbox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/toolbox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/toolbox_tl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/tostring.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/tostring.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/uclust_context.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/uclust_context.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/wait.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/wait.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/consoleappentrypoint.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/mfcclusterbusiness.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/mfcclusterbusiness.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/optimizer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/optimizer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/point.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/readme.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/res/MfcCluster.ico"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/res/MfcCluster.rc2"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/res/Start.ico" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/res/TREEBTNS.bmp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/res/start1.ico" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/resource.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/testfieldbase.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/testfieldbase.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+      <item path="src/MLC/Clustering/boost_plugin.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/boost_plugin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/ccbc_context.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/ccbc_context.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/cluster.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/cluster.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/cluster_context.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/cluster_context.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clusterdb.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clusterdb.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clustering.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clustering.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clusterproperties.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/clusterproperties.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/comparison.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/comparison.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/double_matrix.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/double_matrix.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/double_vector.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/double_vector.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/eigenval.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/eigenval.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/log.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/log.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/matrix_context.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/matrix_context.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/matrixtpl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/mlc_context.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/mlc_context.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/nfieldbase.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/nfieldbase.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/std_plugin.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/std_plugin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/task.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/task.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/taskmap.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/taskmap.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/toolbox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/toolbox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/toolbox_tl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/tostring.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/tostring.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/uclust_context.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/uclust_context.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/wait.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/Clustering/wait.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/consoleappentrypoint.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/mfcclusterbusiness.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/mfcclusterbusiness.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/optimizer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/optimizer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/point.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/readme.txt" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/res/MfcCluster.ico"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/res/MfcCluster.rc2"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/res/Start.ico" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/res/TREEBTNS.bmp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/res/start1.ico" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/resource.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/testfieldbase.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src/MLC/MfcCluster/testfieldbase.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
