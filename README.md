@@ -1,4 +1,4 @@
-# MLCV-Linux
+# MLCV
 
 MLCV is the official implementation of the MultiLevel Clustering (MLC) algorithm decribed in (Vu D. et al. 2014), used to cluster massive DNA sequences. MLCV is implemented in C++ and supports multi-threaded parallelism. It is also integrated with an interactive web-based tool called DiVE to visualize the resulting DNA sequences based embeddings in 2D or 3D. The work is financially supported by the Westerdijk Fungal Biodiversity Institute and the Netherlands eScience Center.
 
