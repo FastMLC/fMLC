@@ -9,10 +9,14 @@
 
 - [LargeVis](https://github.com/lferry007/LargeVis) 
 
+- [DIVE](https://github.com/NLeSC/DiVE)
+
+
 ## Installation:
 
 The folders LargeVis and [DIVE](https://github.com/NLeSC/DiVE) and the file BioScience.x64.dll should be put in the same folder where the application file MfcCluster.exe is.	
 The folder LargeVis should contain LargeVis.exe as compiled from [LargeVis](https://github.com/lferry007/LargeVis). 
+
 
 ## The main windows:
 
