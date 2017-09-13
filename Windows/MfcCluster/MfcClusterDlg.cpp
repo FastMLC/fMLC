@@ -44,15 +44,15 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// Dialog Data
+	// Dialog Data
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
-	
-// Implementation
+
+																 // Implementation
 protected:
 	DECLARE_MESSAGE_MAP()
 };
@@ -170,7 +170,7 @@ BOOL MfcClusterDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	//	add the algorithm, see AlgorithmEnum above
+									//	add the algorithm, see AlgorithmEnum above
 	CO_Algorithm.AddString(L"SLC (Single level clustering)");
 	CO_Algorithm.AddString(L"MLC (Multi-level clustering)");
 	CO_Algorithm.AddString(L"Ccbc");
@@ -199,7 +199,7 @@ BOOL MfcClusterDlg::OnInitDialog()
 	TR_Result.InsertColumn(col++, L"Info", LVCFMT_LEFT, static_cast<int>(pc * 20));							//	info
 	TR_Result.InsertColumn(col, L"Distance from centroid", LVCFMT_LEFT, static_cast<int>(pc * 20));		//	distance from parent centroid
 
-	// set style for tree view
+																										// set style for tree view
 	CCustomTreeChildCtrl & ctrl = TR_Result.GetTreeCtrl();
 	UINT uTreeStyle = TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_FULLROWSELECT;
 	ctrl.ModifyStyle(0, uTreeStyle);
@@ -213,7 +213,7 @@ BOOL MfcClusterDlg::OnInitDialog()
 	EB_InputFilePath.EnableFileBrowseButton(L"fas", L"Fasta files (*.fas;*.fa)|*.fas;*.fa|All Files (*.*)|*.*|");
 	EB_OutputFilePath.EnableFileBrowseButton(L"clus", L"Cluster result files (*.clus)|*.clus|All Files (*.*)|*.*|");
 	wchar_t stringC[264];
-	
+
 	EF_Steps.SetWindowTextW(ToString(stringC, m_Step, 4));
 
 	//SetTimer(1, 250, nullptr);
@@ -224,7 +224,7 @@ BOOL MfcClusterDlg::OnInitDialog()
 
 
 //	manage a single progress bar, so if there is multiple tasks running, display the last one
-void 
+void
 MfcClusterDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	//int32_t first, last;
@@ -283,7 +283,7 @@ MfcClusterDlg::Wait(double p_X)
 {
 	static int lastx = -1;
 	int x = static_cast<int>(p_X * 1000);		//as we called PR_Wait.SetRange(0, 1000);
-	if(lastx == x) {
+	if (lastx == x) {
 		return;
 	}
 	lastx = x;
@@ -338,7 +338,7 @@ bool is_file_exist(const char *fileName)
 void MfcClusterDlg::OnEnChangeInputFilePath()
 {
 	St_Status.SetWindowTextW(L"");
-	
+
 	CO_InputField.Clear();
 	CO_InputField.ResetContent();
 	//	read the first line and update the reference field combo box
@@ -352,7 +352,7 @@ void MfcClusterDlg::OnEnChangeInputFilePath()
 	std::ifstream file(m_InputFilename, std::ofstream::binary);
 	if (file.bad()) {
 		St_Status.SetWindowTextW(L"Unreadable input file");
-		return ; //	error
+		return; //	error
 	}
 
 	std::string line;
@@ -390,18 +390,18 @@ void MfcClusterDlg::OnEnChangeInputFilePath()
 		}
 
 		if (line[0] == '>') { //	a new sequence name
-			//	remove leading '>' and other scrap
+							  //	remove leading '>' and other scrap
 			while (line.length() > 0 && (line.front() == '>' || line.front() <= 32)) {
 				line.erase(line.begin(), line.begin() + 1);
 			}
 			seqName = line;
 			break;
 		}
-		
+
 	} //	read next row from file
 	file.close();
 
-	if(seqName.empty()) {
+	if (seqName.empty()) {
 		St_Status.SetWindowTextW(L"Sequence name is empty");
 		return;
 	}
@@ -419,14 +419,14 @@ void MfcClusterDlg::OnEnChangeInputFilePath()
 		fullfilename.erase(period_idx);
 	}
 	//get filename
-	m_Filename = fullfilename.substr(last_slash_idx+1);
+	m_Filename = fullfilename.substr(last_slash_idx + 1);
 	//get title file
 	m_TitleFilename = fullfilename + ".title";
 	if (is_file_exist(m_TitleFilename.c_str())) {
 		std::ifstream titlefile(m_TitleFilename, std::ofstream::binary);
 		std::getline(titlefile, line);
 		if (line[0] == '>') { //	a new sequence name
-									 //	remove leading '>' and other scrap
+							  //	remove leading '>' and other scrap
 			while (line.length() > 0 && (line.front() == '>' || line.front() <= 32)) {
 				line.erase(line.begin(), line.begin() + 1);
 			}
@@ -436,19 +436,19 @@ void MfcClusterDlg::OnEnChangeInputFilePath()
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	int32_t fieldIdx = 0;
 	std::string comboLine = clustering::StrainNameFilter(line, fieldIdx);
-	while(! comboLine.empty()) {
+	while (!comboLine.empty()) {
 		//		std::string narrow = converter.to_bytes(wide_utf16_source_string);
 		std::wstring wide = converter.from_bytes(comboLine);
 		CO_InputField.AddString(wide.c_str());
 		comboLine = clustering::StrainNameFilter(line, ++fieldIdx);
 	}
-	if (fieldIdx == 0){
+	if (fieldIdx == 0) {
 		MessageBox(L"Please check the title file.", L"Warning", MB_ICONWARNING | MB_OK);
 		Wait(L"", 0.0);
 		return;
 	}
 	//	choose one of them, often the third one
-	if(m_FieldNamePos >= 0 && m_FieldNamePos < fieldIdx) {	//	re-use the same index
+	if (m_FieldNamePos >= 0 && m_FieldNamePos < fieldIdx) {	//	re-use the same index
 		CO_InputField.SetCurSel(m_FieldNamePos);
 	}
 	else if (fieldIdx > 1) {	//	others
@@ -463,7 +463,7 @@ void MfcClusterDlg::OnEnChangeInputFilePath()
 uint64_t GetFileWriteTime(const wchar_t * p_FilePath)
 {
 	HANDLE hFile = CreateFile(p_FilePath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
-	
+
 	uint64_t fileWriteTime = 0;
 	FILETIME ftCreate, ftAccess, ftWrite;
 	if (GetFileTime(hFile, &ftCreate, &ftAccess, &ftWrite)) {
@@ -496,7 +496,7 @@ void MfcClusterDlg::OnBnClickedCluster()
 	}
 
 	int stepNo = 3;
-	if(computeQuality) {
+	if (computeQuality) {
 		stepNo += 2;
 	}
 	double dx = 1.0 / stepNo, x = dx;
@@ -515,14 +515,14 @@ void MfcClusterDlg::OnBnClickedCluster()
 		m_InputFileWriteTime = fileWriteTime;
 		if (m_InputFilename.size() == 0) {
 			MessageBox(L"Please select a source fasta file", L"Warning", MB_ICONWARNING | MB_OK);
-			Wait( L"", 0.0);
+			Wait(L"", 0.0);
 			return;
 		}
-		Wait( L"Loading source file ...", x);		x += dx;
+		Wait(L"Loading source file ...", x);		x += dx;
 		LoadSourceFile();
 	}
 
-	if(algo == MLC && m_Thresholds.size() != 1) {
+	if (algo == MLC && m_Thresholds.size() != 1) {
 		computeQuality = false;
 		//CB_ComputeFMeasure.SetCheck(BST_UNCHECKED);
 	}
@@ -531,10 +531,10 @@ void MfcClusterDlg::OnBnClickedCluster()
 	if (computeQuality) {
 		if (m_FieldNamePos < 0) {
 			MessageBox(L"Please select the position of the sequence name in the fasta file", L"Warning", MB_ICONWARNING | MB_OK);
-			Wait( L"", 0.0);
+			Wait(L"", 0.0);
 			return;
 		}
-		Wait( L"Creating reference cluster", x);		x += dx;
+		Wait(L"Creating reference cluster", x);		x += dx;
 		CreateReferenceCluster();
 	}
 
@@ -546,49 +546,49 @@ void MfcClusterDlg::OnBnClickedCluster()
 	char str[26];
 	asctime_s(str, sizeof str, &timeinfo);
 	std::ofstream logfile(m_logfilename.c_str(), std::ios_base::out | std::ios_base::app);
-	logfile << "Start clustering " << m_InputFilename.c_str() << ": " << str; 
+	logfile << "Start clustering " << m_InputFilename.c_str() << ": " << str;
 	//	Computations
 	delete m_Cluster;
 	m_Cluster = new TCluster(&m_ClusterDatabase);
 
-	Wait( L"Clustering ...", x);	x += dx;
+	Wait(L"Clustering ...", x);	x += dx;
 
 	switch (algo) {
-																							//	*****	Multi-threaded version	*****
-		default:
-		case SLC: { //	Single level clustering
-			m_Cluster->Mlc_Mt(m_Thresholds.back());
-			break;
-		}
-		case MLC: { //	Multi-level clustering
-			m_Cluster->MlcAll_Mt(m_Thresholds, 0);
-			break;
-		}
-		case CCBC: { //	CCBC
-			m_Cluster->Ccbc_Mt(m_Thresholds.back());
-			break;
-		}
-		case GC: { //	Greedy Clust
-			m_Cluster->GClust_Mt(m_Thresholds.back());
-			break;
-		}
-																							//	*****	Single-threaded version	*****
-		case SLC_ST: { //	single-level clustering
-			m_Cluster->Mlc_St(m_Thresholds.back());
-			break;
-		}
-		case MLC_ST: { //	Multi-level clustering
-			m_Cluster->MlcAll_St(m_Thresholds, 0);
-			break;
-		}
-		case CCBC_ST: { //	CCBC
-			m_Cluster->Ccbc_St(m_Thresholds.back());
-			break;
-		}
-		case GC_ST: { //	GC
-			m_Cluster->GClust_St(m_Thresholds.back());
-			break;
-		}
+		//	*****	Multi-threaded version	*****
+	default:
+	case SLC: { //	Single level clustering
+		m_Cluster->Mlc_Mt(m_Thresholds.back());
+		break;
+	}
+	case MLC: { //	Multi-level clustering
+		m_Cluster->MlcAll_Mt(m_Thresholds, 0);
+		break;
+	}
+	case CCBC: { //	CCBC
+		m_Cluster->Ccbc_Mt(m_Thresholds.back());
+		break;
+	}
+	case GC: { //	Greedy Clust
+		m_Cluster->GClust_Mt(m_Thresholds.back());
+		break;
+	}
+			 //	*****	Single-threaded version	*****
+	case SLC_ST: { //	single-level clustering
+		m_Cluster->Mlc_St(m_Thresholds.back());
+		break;
+	}
+	case MLC_ST: { //	Multi-level clustering
+		m_Cluster->MlcAll_St(m_Thresholds, 0);
+		break;
+	}
+	case CCBC_ST: { //	CCBC
+		m_Cluster->Ccbc_St(m_Thresholds.back());
+		break;
+	}
+	case GC_ST: { //	GC
+		m_Cluster->GClust_St(m_Thresholds.back());
+		break;
+	}
 	}
 	//write to log file the ending time 
 	now = time(0);
@@ -602,7 +602,7 @@ void MfcClusterDlg::OnBnClickedCluster()
 
 	std::wostringstream stream;
 	stream << std::endl << L"Cluster contains " << m_Cluster->GroupNo() << L" groups, " << m_Cluster->Sequences().size();
-	if(m_RefCluster) {
+	if (m_RefCluster) {
 		stream << " and " << m_RefCluster->ClassifiedSequenceNo() << L" classified sequences";
 	}
 	OutputDebugString(stream.str().c_str());
@@ -614,7 +614,7 @@ void MfcClusterDlg::OnBnClickedCluster()
 	m_GroupSeqNumbers.reserve(len);
 
 	//	display that cluster in our grid
-	Wait( L"Filling in the result grid ...", x);		x += dx;
+	Wait(L"Filling in the result grid ...", x);		x += dx;
 	SaveInGrid();
 	sort(m_GroupSeqNumbers.begin(), m_GroupSeqNumbers.end());
 	size_t size = m_GroupSeqNumbers.size();
@@ -622,7 +622,7 @@ void MfcClusterDlg::OnBnClickedCluster()
 	int32_t count = 0;
 	int32_t start = 0;
 	for (uint32_t i = 0; i < m_GroupSeqNumbers.size(); ++i) {
-		if( m_GroupSeqNumbers[i] > 1){
+		if (m_GroupSeqNumbers[i] > 1) {
 			sum = sum + m_GroupSeqNumbers[i];
 			count = count + 1;
 			//break;
@@ -631,8 +631,8 @@ void MfcClusterDlg::OnBnClickedCluster()
 	}
 	//	compute and update the F-Measure
 	if (computeQuality) {
-		Wait( L"Computing quality ...", x);		x += dx;
-		double f = m_Cluster->F_Measure_Mt(* m_RefCluster);
+		Wait(L"Computing quality ...", x);		x += dx;
+		double f = m_Cluster->F_Measure_Mt(*m_RefCluster);
 		EF_FMeasure.SetWindowTextW(ToString(stringC, f, 3));
 	}
 	else {
@@ -641,14 +641,14 @@ void MfcClusterDlg::OnBnClickedCluster()
 	//	enable the export button
 	PB_Export.EnableWindow(true);
 
-	Wait( L"Ready", 1.0);
+	Wait(L"Ready", 1.0);
 }
 
 
 
 void MfcClusterDlg::OnBnClickedExport()
 {
-	if(m_Cluster == nullptr) {
+	if (m_Cluster == nullptr) {
 		MessageBox(L"Please run a computation before exporting the resulting cluster", L"Warning", MB_ICONWARNING | MB_OK);
 		Wait(L"", 0.0);
 		return;
@@ -672,14 +672,14 @@ void MfcClusterDlg::OnBnClickedExport()
 
 void MfcClusterDlg::LoadSourceFile()
 {
-	if(m_InputFilename.empty()) {
+	if (m_InputFilename.empty()) {
 		St_Status.SetWindowTextW(L"Please choose an input fasta file as the source of the sequences to cluster");
 		return;
 	}
 	St_Status.SetWindowTextW((L"Loading file " + m_InputFilename).c_str());
 	//	load the reference cluster
 	bool isdna = true;
-	if(m_ClusterDatabase.LoadFastaFile(m_InputFilename.c_str(), isdna, m_FieldNamePos) != 0) {
+	if (m_ClusterDatabase.LoadFastaFile(m_InputFilename.c_str(), isdna, m_FieldNamePos) != 0) {
 		St_Status.SetWindowTextW(L"An error occured when loading the input fasta file");
 		return;
 	}
@@ -692,10 +692,10 @@ void MfcClusterDlg::CreateReferenceCluster()
 	St_Status.SetWindowTextW(L"Creating reference cluster...");
 	delete m_RefCluster;
 
-	m_RefCluster = new TCluster(& m_ClusterDatabase);
+	m_RefCluster = new TCluster(&m_ClusterDatabase);
 	//m_RefCluster->ExportSequences(L"D:\\Clustering\\Cbs2800_sorted.txt");
 	//m_RefCluster->ExportForDuong(L"D:\\Clustering\\Cbs2800_sim_list.txt");
-	int32_t fieldNamePos = CO_InputField.GetCurSel(); 
+	int32_t fieldNamePos = CO_InputField.GetCurSel();
 	m_RefCluster->ClusterByName(fieldNamePos);
 	//m_RefCluster->OutputDebug();
 
@@ -716,25 +716,25 @@ void MfcClusterDlg::DrawThresholds()
 	wchar_t stringC[264];
 	AlgorithmEnum algo = static_cast<AlgorithmEnum>(CO_Algorithm.GetCurSel());
 	switch (algo) {
-		default: {
-			EF_Threshold.SetWindowTextW(ToString(stringC, m_Thresholds.back(), 4));
-			EF_FromThreshold.SetWindowTextW(ToString(stringC, m_Thresholds.back(), 4));
-			EF_ToThreshold.SetWindowTextW(L"1");
-			break;
+	default: {
+		EF_Threshold.SetWindowTextW(ToString(stringC, m_Thresholds.back(), 4));
+		EF_FromThreshold.SetWindowTextW(ToString(stringC, m_Thresholds.back(), 4));
+		EF_ToThreshold.SetWindowTextW(L"1");
+		break;
+	}
+	case MLC: { //	Multi-level clustering
+		std::wstring thresholdStr;
+		std::wstring tothresholdStr;
+		for (auto x : m_Thresholds) {	//	there is always at least one value
+			thresholdStr += ToString(stringC, x, 4);
+			thresholdStr += L"; ";
 		}
-		case MLC: { //	Multi-level clustering
-			std::wstring thresholdStr;
-			std::wstring tothresholdStr;
-			for (auto x : m_Thresholds) {	//	there is always at least one value
-				thresholdStr += ToString(stringC, x, 4);
-				thresholdStr += L"; ";
-			}
-			thresholdStr.resize(thresholdStr.size() - 2);	//	remove the "; "
-			EF_Threshold.SetWindowTextW(thresholdStr.c_str());
-			EF_FromThreshold.SetWindowTextW(thresholdStr.c_str());
-			EF_ToThreshold.SetWindowTextW(L"1");
-			break;
-		}
+		thresholdStr.resize(thresholdStr.size() - 2);	//	remove the "; "
+		EF_Threshold.SetWindowTextW(thresholdStr.c_str());
+		EF_FromThreshold.SetWindowTextW(thresholdStr.c_str());
+		EF_ToThreshold.SetWindowTextW(L"1");
+		break;
+	}
 	}
 }
 
@@ -751,10 +751,10 @@ void MfcClusterDlg::DrawOptThresholds()
 		std::wstring thresholdStr;
 		uint32_t i = 0;
 		for (auto x : m_FromThresholds) {	//	there is always at least one value
-			if (i < m_FromThresholds.size()-1) {
+			if (i < m_FromThresholds.size() - 1) {
 				thresholdStr += ToString(stringC, x, 4);
 				thresholdStr += L"; ";
-			}	
+			}
 			i = +1;
 		}
 		thresholdStr += ToString(stringC, m_OptThreshold, 4);
@@ -772,33 +772,33 @@ void MfcClusterDlg::ReadThresholds()
 	EF_Threshold.GetWindowTextW(buffer, 256);
 	AlgorithmEnum algo = static_cast<AlgorithmEnum>(CO_Algorithm.GetCurSel());
 	switch (algo) {
-		default: {
-			double x = std::stod(buffer);
+	default: {
+		double x = std::stod(buffer);
+		x = std::max(0.0, std::min(x, 1.0));
+		m_Thresholds.back() = x; //	we use only the last value for all algorithm, except for MLC
+		break;
+	}
+	case MLC: { //	Multi-level clustering
+		m_Thresholds.clear();
+		//	split it
+		vector<std::wstring> values = split(buffer, L';');
+		for (auto str : values) {
+			double x = std::stod(str);
 			x = std::max(0.0, std::min(x, 1.0));
-			m_Thresholds.back() = x; //	we use only the last value for all algorithm, except for MLC
-			break;
+			m_Thresholds.push_back(x);
 		}
-		case MLC: { //	Multi-level clustering
-			m_Thresholds.clear();	
-			//	split it
-			vector<std::wstring> values = split(buffer, L';');
-			for (auto str : values) {
-				double x = std::stod(str);
-				x = std::max(0.0, std::min(x, 1.0));
-				m_Thresholds.push_back(x);
-			}
-			RemoveDuplicatesAndSort(m_Thresholds);
-			if (m_Thresholds.size() == 0) {
-				St_Status.SetWindowTextW(L"The threshold must be in the range [0.0, 1.0]. For Multi-level clustering, use a ';' separated list such as \"0.4;0.8;0.98\"");
-				m_Thresholds.push_back(0.98);
-			}
-			break;
+		RemoveDuplicatesAndSort(m_Thresholds);
+		if (m_Thresholds.size() == 0) {
+			St_Status.SetWindowTextW(L"The threshold must be in the range [0.0, 1.0]. For Multi-level clustering, use a ';' separated list such as \"0.4;0.8;0.98\"");
+			m_Thresholds.push_back(0.98);
 		}
+		break;
+	}
 	}
 }
 
 //	read the user interface
-bool MfcClusterDlg::ReadThresholdsForOPTPrediction() 
+bool MfcClusterDlg::ReadThresholdsForOPTPrediction()
 {
 	wchar_t buffer[264];
 	EF_Steps.GetWindowTextW(buffer, 256);
@@ -809,7 +809,7 @@ bool MfcClusterDlg::ReadThresholdsForOPTPrediction()
 	if (x == 0) {
 		m_ToThreshold = 1;
 	}
-	else{
+	else {
 		m_ToThreshold = x;
 	}
 	EF_FromThreshold.GetWindowTextW(buffer, 256);
@@ -831,7 +831,7 @@ bool MfcClusterDlg::ReadThresholdsForOPTPrediction()
 			double x = std::stod(str);
 			x = std::max(0.0, std::min(x, 1.0));
 			m_FromThresholds.push_back(x);
-			if (i == values.size()-1) {
+			if (i == values.size() - 1) {
 				m_FromThreshold = x;
 			}
 			i = +1;
@@ -861,7 +861,7 @@ MfcClusterDlg::SaveInGrid()
 	ctrl.DeleteAllItems();
 
 	HTREEITEM hRoot = nullptr; // parent item
-	
+
 	for (const TCluster & group : m_Cluster->Groups()) {
 		DrawGroup(hRoot, group);
 	}
@@ -895,7 +895,7 @@ MfcClusterDlg::DrawGroup(HTREEITEM & p_ParentNode, const TCluster & p_Cluster)
 		stream << p_Cluster.Groups().size() << (p_Cluster.Groups().size() > 1 ? L" child groups" : L" child group");
 		TR_Result.SetItemText(hItem, ++col, stream.str().c_str());
 
-		if(! isnan(p_Cluster.DistFromParent())) {
+		if (!isnan(p_Cluster.DistFromParent())) {
 			TR_Result.SetItemText(hItem, ++col, ToString(stringC, p_Cluster.DistFromParent(), 3));
 		}
 
@@ -904,7 +904,7 @@ MfcClusterDlg::DrawGroup(HTREEITEM & p_ParentNode, const TCluster & p_Cluster)
 		}
 	}
 	else if (p_Cluster.Comparisons().size() > 0) {	//	draw the comparisons
-		stream << p_Cluster.Comparisons().size() << (p_Cluster.Comparisons().size() > 1 ? L" sequences" : L" sequence" );
+		stream << p_Cluster.Comparisons().size() << (p_Cluster.Comparisons().size() > 1 ? L" sequences" : L" sequence");
 		TR_Result.SetItemText(hItem, ++col, stream.str().c_str());
 
 		if (!isnan(p_Cluster.DistFromParent())) {
@@ -917,7 +917,7 @@ MfcClusterDlg::DrawGroup(HTREEITEM & p_ParentNode, const TCluster & p_Cluster)
 		m_GroupSeqNumbers.push_back((int32_t)p_Cluster.IdList().size());
 	}
 	else {	//	a group without any sequence in it except the centroid
-		//TR_Result.SetItemText(hItem, ++col, L"Single sequence");
+			//TR_Result.SetItemText(hItem, ++col, L"Single sequence");
 		++col;
 		if (!isnan(p_Cluster.DistFromParent())) {
 			TR_Result.SetItemText(hItem, ++col, ToString(stringC, p_Cluster.DistFromParent(), 3));
@@ -958,25 +958,25 @@ void MfcClusterDlg::OnCbnSelchangeAlgorithm()
 
 	AlgorithmEnum algo = static_cast<AlgorithmEnum>(CO_Algorithm.GetCurSel());
 	switch (algo) {
-		default:
-		case SLC: {	//	Single level clustering
-		case SLC_ST:
-			break;
-		}
-		case MLC: { //	Multi-level clustering
-		case MLC_ST:
-			//CB_ComputeFMeasure.SetCheck(false);
-			//CB_ComputeFMeasure.EnableWindow(false);
-			break;
-		}
-		case CCBC: { //	CCBC
-		case CCBC_ST:
-			break;
-		}
-		case GC: { //	greedy clustering
-		case GC_ST:
-			break;
-		}
+	default:
+	case SLC: {	//	Single level clustering
+	case SLC_ST:
+		break;
+	}
+	case MLC: { //	Multi-level clustering
+	case MLC_ST:
+		//CB_ComputeFMeasure.SetCheck(false);
+		//CB_ComputeFMeasure.EnableWindow(false);
+		break;
+	}
+	case CCBC: { //	CCBC
+	case CCBC_ST:
+		break;
+	}
+	case GC: { //	greedy clustering
+	case GC_ST:
+		break;
+	}
 	}
 	DrawThresholds();
 }
@@ -1027,7 +1027,7 @@ void MfcClusterDlg::OnBnClickedComputefmeasure()
 	//	compute and update the F-Measure
 	wchar_t stringC[1032];
 	AlgorithmEnum algo = static_cast<AlgorithmEnum>(CO_Algorithm.GetCurSel());
-	if ((algo == MLC || algo==MLC_ST) && m_Thresholds.size() != 1) {
+	if ((algo == MLC || algo == MLC_ST) && m_Thresholds.size() != 1) {
 		m_Cluster->Flatten();
 	}
 	//	just to have a nicer display
@@ -1097,7 +1097,7 @@ double MfcClusterDlg::Cluster(const vector<double> & thresholds)
 		m_Cluster->GClust_Mt(thresholds.back());
 		break;
 	}
-					 //	*****	Single-threaded version	*****
+			 //	*****	Single-threaded version	*****
 	case SLC_ST: { //	single-level clustering
 		m_Cluster->Mlc_St(thresholds.back());
 		break;
@@ -1142,7 +1142,7 @@ void MfcClusterDlg::OnBnClickedOptimize()
 {
 	CreateReferenceCluster();
 	AlgorithmEnum algo = static_cast<AlgorithmEnum>(CO_Algorithm.GetCurSel());
-	
+
 	//vector<double> parameters;
 	//parameters.push_back(0.9);// m_Thresholds.back());
 	//vector<double> steps;
@@ -1155,12 +1155,12 @@ void MfcClusterDlg::OnBnClickedOptimize()
 	CString outFilePath;
 	EB_OutputFilePath.GetWindowTextW(outFilePath);
 	m_OutputClusterFilePath = outFilePath.GetBuffer();
-	const int result = MessageBox( L"Do you want to save the prediction in the result file?", L"Warning", MB_YESNOCANCEL);
+	const int result = MessageBox(L"Do you want to save the prediction in the result file?", L"Warning", MB_YESNOCANCEL);
 	std::ofstream file(m_OutputClusterFilePath.c_str(), std::ofstream::binary);
 	switch (result)
 	{
-	case IDYES:		
-		if  (file.fail()) {
+	case IDYES:
+		if (file.fail()) {
 			MessageBox(L"Please enter the path for the output file.", L"Warning", MB_ICONWARNING | MB_OK);
 			return; //	error
 		}
@@ -1176,7 +1176,7 @@ void MfcClusterDlg::OnBnClickedOptimize()
 	err = 1.0 - Cluster(parameters);
 	} while (opt.Next(err));*/
 	//	read inputs
-	if (ReadThresholdsForOPTPrediction()==false) {
+	if (ReadThresholdsForOPTPrediction() == false) {
 		return;
 	}
 	double bestf = 0.0;
@@ -1195,14 +1195,14 @@ void MfcClusterDlg::OnBnClickedOptimize()
 			m_OptThreshold = threshold;
 		}
 		//save in the result file
-		if (result==IDYES) {
-			file << threshold << "\t" <<  f << endl;
+		if (result == IDYES) {
+			file << threshold << "\t" << f << endl;
 			bool isError = (file.goodbit != 0);
 		}
 		threshold = threshold + m_Step;
 	} while (threshold <= m_ToThreshold);
 	//close file
-	
+
 	file.close();
 
 	//	display that cluster in our grid
@@ -1224,7 +1224,7 @@ void MfcClusterDlg::OnBnClickedOption()
 	//OptionDlg optdlg();
 	int32_t m_MinOverlap = m_ClusterDatabase.m_MinOverlap;
 	int32_t m_MinSeqNoForMLC = m_ClusterDatabase.m_MinSeqNoForMLC;
-	OptionDlg optdlg( m_MinOverlap, m_MinSeqNoForMLC, m_MinSimForVisualization, m_KneighborNo, m_VisDimension);
+	OptionDlg optdlg(m_MinOverlap, m_MinSeqNoForMLC, m_MinSimForVisualization, m_KneighborNo, m_VisDimension);
 	optdlg.DoModal();
 	m_ClusterDatabase.m_MinOverlap = optdlg.m_MinOverlap;
 	m_MinSimForVisualization = optdlg.m_MinSimForVisualization;
@@ -1237,9 +1237,9 @@ void MfcClusterDlg::OnBnClickedOption()
 void MfcClusterDlg::OnBnClickedVisualize()
 {
 	// TODO: Add your control notification handler code here
-	
+
 	Visualize();
-	
+
 }
 
 void startLargeVisWaitForFinish(CString parameters)
@@ -1250,7 +1250,7 @@ void startLargeVisWaitForFinish(CString parameters)
 	ShExecInfo.hwnd = NULL;
 	ShExecInfo.lpVerb = NULL;
 	//ShExecInfo.lpFile = L"..\\..\\..\\LargeVis\\compute_coordinates.exe";
-	ShExecInfo.lpFile = L"LargeVis\\compute_coordinates.exe";
+	ShExecInfo.lpFile = L"LargeVis\\LargeVis.exe";
 	ShExecInfo.lpParameters = parameters;
 	ShExecInfo.lpDirectory = NULL;
 	ShExecInfo.nShow = SW_HIDE;
@@ -1260,7 +1260,7 @@ void startLargeVisWaitForFinish(CString parameters)
 	{
 		if (ShExecInfo.hProcess != NULL)
 			WaitForSingleObject(ShExecInfo.hProcess, INFINITE);
-		//std::wstring error(L" LargeVis Finished. Load file " );
+		std::wstring error(L" LargeVis Finished. You can load the json file in DiVE from Working ");
 		//MessageBox(NULL, static_cast<LPCWSTR>(error.c_str()), L"Warning", MB_ICONWARNING | MB_OK);
 
 	}
@@ -1338,7 +1338,7 @@ std::vector<std::string> split(const std::string &s, char delim)
 
 void combinePointsWithProperties(CString inputtitlefilename, CString inputfilename, CString outputfilename, CString coordArchivePath)
 {
-	std::ifstream titlefile(inputtitlefilename,std::ofstream::binary);
+	std::ifstream titlefile(inputtitlefilename, std::ofstream::binary);
 	//std::ifstream titlefile(m_TitleFilename, std::ofstream::binary);
 	std::ifstream infile(inputfilename);
 	std::ofstream outfile(outputfilename);
@@ -1357,38 +1357,38 @@ void combinePointsWithProperties(CString inputtitlefilename, CString inputfilena
 	/////read title file
 	if (titlefile.bad()) {
 	}
-	else{
+	else {
 		std::getline(titlefile, line);
-		if (line != ""){
-		CString outline;
-		/*CString firstline = L"\"";*/
-		CString firstline = L"\"NamesOfProperties\":[";
-		std::vector<std::string> properties = split(line, '|');
-		int propertyindex = 0;
-		for (std::vector<std::string>::iterator it = properties.begin(); it != properties.end(); ++it) {
-			std::string apostrofstr = "\"";
-			CString apostrof(apostrofstr.c_str());
-			CString activeproperty((*it).c_str());
-			propertyindex++;
-			if (propertyindex != 1)
-			{
-				outline += ",";				
-				firstline += ",";
-			}
-			else
-			{
+		if (line != "") {
+			CString outline;
+			/*CString firstline = L"\"";*/
+			CString firstline = L"\"NamesOfProperties\":[";
+			std::vector<std::string> properties = split(line, '|');
+			int propertyindex = 0;
+			for (std::vector<std::string>::iterator it = properties.begin(); it != properties.end(); ++it) {
+				std::string apostrofstr = "\"";
+				CString apostrof(apostrofstr.c_str());
+				CString activeproperty((*it).c_str());
+				propertyindex++;
+				if (propertyindex != 1)
+				{
+					outline += ",";
+					firstline += ",";
+				}
+				else
+				{
 
+				}
+				outline += apostrof + activeproperty + apostrof;
+				firstline += apostrof + activeproperty + apostrof;
 			}
-			outline += apostrof + activeproperty + apostrof;
-			firstline += apostrof + activeproperty + apostrof;
-		}
-		outline += "]}";
-		firstline += "], ";
-		CT2CA pszConvertedAnsiString1(firstline);
-		std::string firstlinestring(pszConvertedAnsiString1);
-		outfile << firstlinestring;
-		outfileArc << firstlinestring;
-		firstlinecreated = true;
+			outline += "]}";
+			firstline += "], ";
+			CT2CA pszConvertedAnsiString1(firstline);
+			std::string firstlinestring(pszConvertedAnsiString1);
+			outfile << firstlinestring;
+			outfileArc << firstlinestring;
+			firstlinecreated = true;
 		}
 		titlefile.close();
 	}
@@ -1434,7 +1434,7 @@ void combinePointsWithProperties(CString inputtitlefilename, CString inputfilena
 				firstline = firstline + L"NamesOfProperties\":[";// +xcord + L", " + ycord + L", " + zcord + L"],\"Properties\" : [";
 			}
 		}
-		
+
 		int propertyindex = 0;
 		for (std::vector<std::string>::iterator it = properties.begin(); it != properties.end(); ++it) {
 			std::string apostrofstr = "\"";
@@ -1478,11 +1478,11 @@ void combinePointsWithProperties(CString inputtitlefilename, CString inputfilena
 
 void MfcClusterDlg::Visualize()
 {
-	
+
 	CString mfcOutFilePath = CString(m_InputFilePath.c_str()) + CString(m_Filename.c_str()) + L".sim";
 
 	CString largeVisOutFilePath = CString(m_InputFilePath.c_str()) + CString(m_Filename.c_str()) + L".outLargeVis";
-	CString coordArchivePath = CString(m_InputFilePath.c_str()) + CString(m_Filename.c_str())  + L"_coord.json";
+	CString coordArchivePath = CString(m_InputFilePath.c_str()) + CString(m_Filename.c_str()) + L"_coord.json";
 	//CString largeVIsInputParameters = L" -fea 0 -input " + mfcOutFilePath + L" -output " + largeVisOutFilePath + L" -outdim 3 -threads 4 -log 0";
 	std::string  s = to_string(m_KneighborNo);
 	CString neigs(s.c_str());
@@ -1497,7 +1497,7 @@ void MfcClusterDlg::Visualize()
 	if (m_VisDimension == 2) {
 		largeVIsInputParameters = L" -fea 0 -input " + mfcOutFilePath + L" -output " + largeVisOutFilePath + L" -outdim 2 -threads 4 -log 1 -samples 2 " + edges + L" -neigh " + neigs;
 	}
-	CString finalFilePath = L"..\\DiVE\\data\\data.js";
+	CString finalFilePath = L"DiVE\\data\\data.js";
 
 	if (m_InputFilename.size() == 0) {
 		MessageBox(L"Please enter the input file to be cluster and cluster the file first.", L"Warning", MB_ICONWARNING | MB_OK);
@@ -1506,14 +1506,14 @@ void MfcClusterDlg::Visualize()
 	}
 	else {
 		std::wstring ws = mfcOutFilePath.GetBuffer(mfcOutFilePath.GetLength());
-		std::string s= std::string(ws.begin(), ws.end());
-		if (is_file_exist(s.c_str())==false)  {
+		std::string s = std::string(ws.begin(), ws.end());
+		if (is_file_exist(s.c_str()) == false) {
 			MessageBox(L"Please save a similarity matrix first.", L"Warning", MB_ICONWARNING | MB_OK);
 			Wait(L"", 0.0);
 			return;
 		}
 	}
-	
+
 	//std::wstring error(L"Starting generating coordinates. Please wait...");
 	//check if we need to generate the coordinates
 	fstream file;
@@ -1529,7 +1529,7 @@ void MfcClusterDlg::Visualize()
 	else {
 		computecoordinates = true;
 	}
-	if (computecoordinates) {		
+	if (computecoordinates) {
 		//write to log file the starting time 
 		time_t now = time(0);
 		// Convert now to tm struct for local timezon
@@ -1561,7 +1561,7 @@ void MfcClusterDlg::Visualize()
 
 	//ShellExecute(0, 0, L"..\\..\\..\\DiVE\\index.html", 0, 0, SW_SHOW);
 	ShellExecute(0, 0, L"DiVE\\index.html", 0, 0, SW_SHOW);
-	
+
 }
 
 
@@ -1574,16 +1574,16 @@ void MfcClusterDlg::OnBnClickedSavesimilarity()
 	CString fullfilename = CString(m_InputFilePath.c_str()) + CString(m_Filename.c_str()) + L".sim";
 	//	Save similarity in a file
 	std::ofstream file(static_cast<const wchar_t *>(fullfilename), std::ofstream::binary);
-	
+
 	Wait(L"Saving similarity ...", 0.3);
 
 	/*if (m_Thresholds.size() > 1) {
-		lowerboundthreshold = m_Thresholds[m_Thresholds.size()-2];
+	lowerboundthreshold = m_Thresholds[m_Thresholds.size()-2];
 	}*/
 	int32_t maxseqnotoberecompared = (int32_t)(sqrt(m_KneighborNo * m_ClusterDatabase.m_Sequences.size()));
-	m_Cluster->SaveSimilarity(static_cast<const wchar_t *>(fullfilename), m_KneighborNo, m_MinSimForVisualization,m_Thresholds.back(), maxseqnotoberecompared);
+	m_Cluster->SaveSimilarity(static_cast<const wchar_t *>(fullfilename), m_KneighborNo, m_MinSimForVisualization, m_Thresholds.back(), maxseqnotoberecompared);
 	Wait(L"Ready", 0.0);
-	
+
 }
 
 
@@ -1591,15 +1591,15 @@ void MfcClusterDlg::OnBnClickedSavefullsimilarity()
 {
 	// TODO: Add your control notification handler code here
 	//get path for saving similarity 
-	if(m_ClusterDatabase.m_Sequences.size() == 0) {
+	if (m_ClusterDatabase.m_Sequences.size() == 0) {
 		return;
 	}
 	CString fullfilename = CString(m_InputFilePath.c_str()) + CString(m_Filename.c_str()) + L".sim";
 	//	Save similarity in a file
-//	std::ofstream file(static_cast<const wchar_t *>(fullfilename), std::ofstream::binary);
+	//	std::ofstream file(static_cast<const wchar_t *>(fullfilename), std::ofstream::binary);
 
 	Wait(L"Saving similarity ...", 0.3);
-	m_Cluster->SaveFullSimilarity(static_cast<const wchar_t *>(fullfilename),m_MinSimForVisualization);
+	m_Cluster->SaveFullSimilarity(static_cast<const wchar_t *>(fullfilename), m_MinSimForVisualization);
 
 	Wait(L"Ready", 0.0);
 }
@@ -1608,13 +1608,13 @@ void MfcClusterDlg::OnBnClickedSavefullsimilarity()
 void MfcClusterDlg::OnBnClickedSave()
 {
 	//	save clusters in Fasta file
-	if (m_recordnameextended = true){
+	if (m_recordnameextended = true) {
 		if (MessageBox(L"You have saved the result. Do you wish to continue?", L"Warning", MB_YESNOCANCEL) == IDNO) {
 			Wait(L"", 0.0);
 			return;
 		}
 	}
-	m_Cluster->ExtendRecordNames(0, (uint32_t)m_Thresholds.size() ,"");
+	m_Cluster->ExtendRecordNames(0, (uint32_t)m_Thresholds.size(), "");
 	m_recordnameextended = true;
 	//	Save results into the fasta file
 	std::ofstream file(m_InputFilename.c_str(), std::ofstream::binary);
@@ -1632,7 +1632,7 @@ void MfcClusterDlg::OnBnClickedSave()
 	file.close();
 	//	Save results into the title file
 	fstream titlefile;
-	titlefile.open(m_TitleFilename.c_str(), ios_base::out | ios_base::in);  
+	titlefile.open(m_TitleFilename.c_str(), ios_base::out | ios_base::in);
 	if (titlefile.is_open())
 	{
 		std::string line;
@@ -1642,7 +1642,7 @@ void MfcClusterDlg::OnBnClickedSave()
 		std::ofstream titlefile(m_TitleFilename.c_str(), std::ofstream::binary);
 		titlefile << line;
 		for (uint32_t i = 0; i < m_Thresholds.size(); ++i) {
-			titlefile << "|Level" << to_string(i + 1) ;
+			titlefile << "|Level" << to_string(i + 1);
 		}
 		titlefile.close();
 	}
