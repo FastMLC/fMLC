@@ -1,7 +1,7 @@
 # MLCV (Windows version)
 
 
-Dependencies : 
+## Dependencies : 
 
 - [Boost 1.60.0](http://www.boost.org/users/history/version_1_60_0.html)
 
@@ -9,11 +9,12 @@ Dependencies :
 
 - [LargeVis](https://github.com/lferry007/LargeVis) 
 
-Installation:
+## Installation:
 
-The folders LargeVis and DIVE and the file BioScience.x64.dll should be put in the same folder where the application file MfcCluster.exe is.	
+The folders LargeVis and [DIVE] (https://github.com/NLeSC/DiVE) and the file BioScience.x64.dll should be put in the same folder where the application file MfcCluster.exe is.	
+The folder LargeVis should contain LargeVis.exe as compiled from [LargeVis](https://github.com/lferry007/LargeVis). 
 
-The main windows:
+## The main windows:
 
 -Input file path: The path of the fasta file of sequences to be clustered. In this fasta file, a sequence is represented by two lines. The title line starting with character ">" containing multiple information fields separated by the pipe character "|". The first information field is the index of the sequence starting at 1. The second line contains the sequence. Another input file with the same name of the fasta file in the format .title describing the information fields can be given optionally. The two input files Yeast_CBS_GB_ITS_1seqfor1strain_Species.fas and Yeast_CBS_GB_ITS_1seqfor1strain_Species.title in the Working folder can be seen as given examples.
 
