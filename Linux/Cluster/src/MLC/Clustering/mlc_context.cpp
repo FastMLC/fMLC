@@ -7,7 +7,7 @@
 mlc_context1::mlc_context1(TCluster & p_Cluster, const vector<uint32_t> & p_IdxList, double p_Threshold, uint32_t p_NumThread)
 	: m_Cluster(p_Cluster), m_Threshold(p_Threshold), m_NextIdx(0), m_NumThread(p_NumThread), m_IdxList(p_IdxList)
 {
-	m_CentroidList.reserve(std::max(2000u, static_cast<uint32_t>(m_Cluster.Sequences().size() / 4)));	//	supposing there will be 4 sequences in each group
+	m_CentroidList.reserve(std::max(2000u, static_cast<uint32_t>(m_Cluster.Sequences().size() / 4)));	
 	m_Groups.reserve(std::max(2000u, static_cast<uint32_t>(m_Cluster.Sequences().size() / 4)));
         return;
 }
