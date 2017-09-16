@@ -35,7 +35,7 @@ TCluster::TCluster(const ClusterDB * p_ClusterDB)
 }
 
 TCluster::TCluster(const ClusterDB * p_ClusterDB, uint32_t p_CentralSeqIdx)
-	: m_GroupsPerTour(50), m_SeqPerThread(3), m_BlocNo(10), m_CentralSeqIdx(p_CentralSeqIdx), m_MinDist(0.0), m_MaxDist(0.0), m_DistFromParent(cNaN),
+	: m_GroupsPerTour(50), m_SeqPerThread(30), m_BlocNo(10), m_CentralSeqIdx(p_CentralSeqIdx), m_MinDist(0.0), m_MaxDist(0.0), m_DistFromParent(cNaN),
 	m_IsSortedGroups(false), m_ClusterDB(p_ClusterDB)
 {
 	m_NumThread = std::max(1u, std::thread::hardware_concurrency());	//	return 0 in case of an error
@@ -1747,11 +1747,15 @@ OperatorMlc1(uint32_t p_Id, mlc_context1 * ctx)
 	//const uint32_t seqSize = static_cast<uint32_t>(ctx->m_Cluster.Sequences().size());
 	const uint32_t idxSize = static_cast<uint32_t>(ctx->m_IdxList.size());
 	//const uint32_t seqNo = ctx->m_Cluster.m_SeqPerBloc;
-	const uint32_t seqNo = (uint32_t)(ctx->m_IdxList.size()/ ctx->m_Cluster.m_BlocNo);
+	const uint32_t seqNo = max((uint32_t)(ctx->m_IdxList.size()/ ctx->m_Cluster.m_BlocNo), ctx->m_Cluster.m_SeqPerThread);
 
+	
 	//	create a temporary list of centroids. Accessing directly the main centroid list would need to lock and unlock the mutex once for each sequence !
 	vector<uint32_t> centroidList;
 	centroidList.reserve(2000 + static_cast<uint32_t>(ctx->m_CentroidList.capacity() / ctx->m_NumThread));	//	supposing each thread will manage the same number of groups
+
+	vector<TCluster> groups;
+	groups.reserve(2000 + static_cast<uint32_t>(ctx->m_CentroidList.capacity() / ctx->m_NumThread));	//	supposing each thread will manage the same number of groups
 
 	while (true) {
 		ctx->m_IdxMutex.lock();										//	lock the indexes
@@ -1780,13 +1784,18 @@ OperatorMlc1(uint32_t p_Id, mlc_context1 * ctx)
 			group.ComputeCentroid();
 			group.PrepareCentroid();
 			centroidList.push_back(group.CentralSeqIdx());	//	add the centroid to the local centroid list
+			//ctx->m_Groups.push_back(group);
+			groups.push_back(group);
 		}
 	} // next bloc of 'seqNo' sequencess
 
 	  //	copy our centroids into the global list
 	ctx->m_CentroidMutex.lock();					//	lock the indexes
+	uint32_t  i = 0;
 	for (uint32_t idx : centroidList) {
 		ctx->m_CentroidList.push_back(idx);
+		ctx->m_Groups.push_back(groups[i]);
+		i = i + 1;
 	}
 	ctx->m_CentroidMutex.unlock();				//	unlock the indexes
 }
@@ -1948,6 +1957,9 @@ TCluster::Mlc_MultiThread(double p_Threshold, vector<uint32_t> & p_IdxSortedList
 		threads.clear();
 	}
 
+//	//create a temp list of groups to store all the groups of the block
+	vector<TCluster> & tempgroups = context.m_Groups;
+
 	//	make a list of all centroid computed by all threads, sorted and without duplicates
 
 	//	get the list of centroids
@@ -1958,6 +1970,88 @@ TCluster::Mlc_MultiThread(double p_Threshold, vector<uint32_t> & p_IdxSortedList
 	//	cluster the centroid sequences
 	Ccbc_Mt(p_Threshold, centroidList);
 
+
+	//look for the final group of the temp groups
+	uint32_t i = 0;
+	vector<uint32_t> groupidxList;
+	for (TCluster & tempgroup : tempgroups) {
+		uint32_t r = tempgroup.CentralSeqIdx();
+		//look for the final group of r
+		uint32_t i = 0;
+		for (TCluster & group : m_Groups) {
+			if (r == group.CentralSeqIdx()) {
+				groupidxList.push_back(i);
+				break;
+			}
+			if (group.Comparisons().size() > 0) {
+				for (const TComparison & comp : group.Comparisons()) {
+					uint32_t s = comp.SrceIdx();
+					if (r == s) {
+						groupidxList.push_back(i);
+						break;
+					}
+				}
+			}
+			for (uint32_t id : group.IdList()) {
+				if (r == id) {
+					groupidxList.push_back(i);
+					break;
+				}
+			}
+			i = i + 1;
+		}
+
+	}
+	//merge temp groups in to thefinal groups
+	i = 0;
+	for (TCluster & tempgroup : tempgroups) {
+		vector<uint32_t> reflist;
+		vector<uint32_t> srcelist;
+		TCluster & group = m_Groups[groupidxList[i]];
+		uint32_t cenidx = group.CentralSeqIdx();
+		reflist.push_back(group.CentralSeqIdx());
+		if (group.Comparisons().size() > 0) {
+			for (const TComparison & comp : group.Comparisons()) {
+				uint32_t s = comp.SrceIdx();
+				if (std::find(reflist.begin(), reflist.end(), s) == reflist.end()) {
+					reflist.push_back(s);
+				}
+				uint32_t r = comp.RefIdx();
+				if (std::find(reflist.begin(), reflist.end(), s) == reflist.end()) {
+					reflist.push_back(r);
+				}
+			}
+			for (uint32_t id : group.IdList()) {
+				if (std::find(reflist.begin(), reflist.end(), id) == reflist.end()) {
+					reflist.push_back(id);
+				}
+			}
+		}
+
+		if (tempgroup.Comparisons().size() > 0) {
+			for (const TComparison & comp : tempgroup.Comparisons()) {
+				uint32_t s = comp.SrceIdx();
+				if (std::find(reflist.begin(), reflist.end(), s) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), s) == srcelist.end()) {
+					group.Comparisons().emplace_back( s, cenidx, comp.Sim());
+					srcelist.push_back(s);
+				}
+				uint32_t r = comp.RefIdx();
+				if (std::find(reflist.begin(), reflist.end(), r) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), r) == srcelist.end()) {
+					group.Comparisons().emplace_back(r, cenidx, comp.Sim());
+					srcelist.push_back(r);
+				}
+			}
+			for (uint32_t id : tempgroup.IdList()) {
+				if (std::find(reflist.begin(), reflist.end(), id) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), id) == srcelist.end()) {
+					group.Comparisons().emplace_back(id, cenidx, 1);
+					srcelist.push_back(id);
+				}
+			}
+		}
+		i = i + 1;
+	}
+
+	return;
 	//	don't scan the centroids any more, they are already either a group centroid, or moved into another group.
 	RemoveFromList(p_IdxSortedList, centroidList);
 
@@ -2042,6 +2136,7 @@ TCluster::Mlc_MultiThread(double p_Threshold, vector<uint32_t> & p_IdxSortedList
 	stream << L"Missing group number: " << missingGroupNo << L"\r\n";
 
 	//OutputDebugString(stream.str().c_str());
+	
 }
 
 
@@ -2326,11 +2421,8 @@ TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, i
 		vector<uint32_t>	idxList;
 		//uint32_t centroidIdx = UINT32_MAX;
 		for (const auto & group : m_Groups) {
-			uint32_t idx = group.CentralSeqIdx();
-			idxList.push_back(idx); //list of centrality idxes of each sub group
-			//if (p_idxList.size() == 0 || std::find(p_idxList.cbegin(), p_idxList.cend(), idx) == p_idxList.cend()) {
-			//	p_idxList.push_back(idx); //list of centrality idxes of each sub group
-			//}	
+			uint32_t idx = group.CentralSeqIdx();		
+			idxList.push_back(idx); //list of centrality idxes of each sub group				
 		}
 		//compare all centralities with each other
 		//	step 2 : call InitSrce and InitRef on all sequences
@@ -2409,9 +2501,13 @@ TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, i
 		//	p_idxList.push_back(m_CentralSeqIdx); //list of centrality idxes of each sub group
 		//}
 		vector<uint32_t>	idxList;
+		
 		//	save all sequence IDs of that group
 		if (m_Comparisons.size() > 0) {
 			idxList.push_back(m_CentralSeqIdx);
+			//if (p_idxList.size() == 0 || std::find(p_idxList.cbegin(), p_idxList.cend(), m_CentralSeqIdx) == p_idxList.cend()) {
+			//	p_idxList.push_back(m_CentralSeqIdx); //list of centrality idxes of each sub group
+			//}
 			for (const TComparison & comp : m_Comparisons) {
 				TNFieldBase * srce = ClusterDatabase()->m_Sequences[comp.SrceIdx()];
 				idxList.push_back(comp.SrceIdx()); //list of sequence indexes of the group
@@ -2471,6 +2567,7 @@ TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, i
 					if ((idxList[i] == m_CentralSeqIdx) && (idxList[j] == m_CentralSeqIdx)) {
 						continue;
 					}
+					
 					TNFieldBase * srce = ClusterDatabase()->m_Sequences[idxList[i]];
 					uint32_t s = srce->RecordId();
 					TNFieldBase * ref = ClusterDatabase()->m_Sequences[idxList[j]];
@@ -2478,10 +2575,8 @@ TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, i
 					double sim = max(ctx.m_Sims[i][j], ctx.m_Sims[j][i]);
 					if (sim >= p_MinSim) {
 						p_Stream << r << " " << s << " " << std::to_string(sim) << "\r\n";
-					}
+					}				
 					if ((p_Count < p_Max) && (sim < p_Threshold)) {
-					//if ((p_Count < p_Max) && (count < (int)p_KneighborNo - smax )) {
-					//if ((p_Count < p_Max) && (count < smax * p_Max / (ClusterDatabase()->m_Sequences.size()))) {
 						if (idxList[i] != m_CentralSeqIdx && (p_idxList.size() == 0 || std::find(p_idxList.cbegin(), p_idxList.cend(), r) == p_idxList.cend())) {
 							p_idxList.push_back(r); //list of centrality idxes of each sub group
 							p_Count = p_Count + 1;
@@ -2495,8 +2590,9 @@ TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, i
 					}
 				}
 			}
-		}
+		}	
 	}
+	
 }
 
 void

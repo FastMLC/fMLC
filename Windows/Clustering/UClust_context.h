@@ -5,11 +5,11 @@
 #include "Cluster.h"
 
 
-class gclust_context
+class uclust_context
 {
 	public:
-		gclust_context(uint32_t p_SMin, uint32_t p_GMin, TCluster & p_Cluster, vector<uint32_t> & m_IdxList, double p_Threshold);
-		~gclust_context(void) ;
+		uclust_context(uint32_t p_SMin, uint32_t p_GMin, TCluster & p_Cluster, vector<uint32_t> & m_IdxList, double p_Threshold);
+		~uclust_context(void) ;
 
 		//	multithreading indexes and mutex
 		std::mutex	m_IdxMutex ;					//	lock access 
@@ -28,7 +28,7 @@ class gclust_context
 		int	m_WaitHdl;								//	a handle to the task managing the progress bar
 
 private :
-	explicit gclust_context(const gclust_context & srce) = delete;
-	gclust_context & operator=(const gclust_context & ) = delete ;	//	avoid implicit assignement operator
+	explicit uclust_context(const uclust_context & srce) = delete;
+	uclust_context & operator=(const uclust_context & ) = delete ;	//	avoid implicit assignement operator
 };
 

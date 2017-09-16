@@ -24,6 +24,8 @@ class mlc_context1
 
 		const vector<uint32_t> &	m_IdxList;		//	the index of the sequences to process, must not be sorted
 		vector<uint32_t> m_CentroidList;				//	the list of all sequences considered as centroids, to be completed
+		vector<TCluster> m_Groups;
+
 
 private :
 	explicit mlc_context1(const mlc_context1 & srce) = delete;

@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
 
-#include "gclust_context.h"
+#include "uclust_context.h"
 
-gclust_context::gclust_context(uint32_t p_NextIdx, uint32_t p_FirstGroupIdx, TCluster & p_Cluster, vector<uint32_t> & p_IdxList, double p_Threshold)
+uclust_context::uclust_context(uint32_t p_NextIdx, uint32_t p_FirstGroupIdx, TCluster & p_Cluster, vector<uint32_t> & p_IdxList, double p_Threshold)
 	: m_NextIdx(p_NextIdx),
 		m_FirstGroupIdx(p_FirstGroupIdx),
 		m_Cluster(p_Cluster),
@@ -18,7 +18,8 @@ gclust_context::gclust_context(uint32_t p_NextIdx, uint32_t p_FirstGroupIdx, TCl
 	return;
 }
 
-gclust_context::~gclust_context(void)
+
+uclust_context::~uclust_context(void)
 {
 	for(std::mutex * ptr : m_MutexList) {
 		delete ptr;
