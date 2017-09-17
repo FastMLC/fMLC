@@ -46,7 +46,7 @@ TCluster::TCluster(const ClusterDB * p_ClusterDB)
 
 
 //TCluster::TCluster(const ClusterDB * p_ClusterDB, uint32_t p_CentralSeqIdx)
-//	: m_GroupsPerTour(50), m_SeqPerThread(10), m_SeqPerBloc(35), m_CentralSeqIdx(p_CentralSeqIdx), m_MinDist(0.0), m_MaxDist(0.0), m_DistFromParent(cNaN),
+//	: m_GroupsPerTour(50), m_SeqPerThread(30), m_SeqPerBloc(35), m_CentralSeqIdx(p_CentralSeqIdx), m_MinDist(0.0), m_MaxDist(0.0), m_DistFromParent(cNaN),
 //	m_IsSortedGroups(false), m_ClusterDB(p_ClusterDB)
 //{
 //	m_NumThread = std::max(1u, std::thread::hardware_concurrency());	//	return 0 in case of an error
@@ -2192,11 +2192,11 @@ OperatorCcbc1(uint32_t p_Id, ccbc_context * ctx)
 
 		//	scan the sequences
 		for (auto sit = sit_first; sit < sit_end; ++sit) {			//	s is the index in m_IdxList
-			uint32_t s = *sit;												//	the index in the sequence list
-			TNFieldBase * ref = sequences[s];			//	the reference sequence
-			if (!ref->RefReady()) {
-				ref->InitRef(true);
-			}
+		    uint32_t s = *sit;												//	the index in the sequence list
+                    TNFieldBase * ref = sequences[s];			//	the reference sequence
+		    if (!ref->RefReady()) {
+			ref->InitRef(true);
+		    }
 		} // next sequence
 	} // next bloc of 'seqNo' sequences
 }
@@ -2216,7 +2216,7 @@ OperatorCcbc2_Blast(uint32_t p_Id, ccbc_context * ctx)
     ctx->m_NextIdx = end;										//	update the next index in the context
 
     ctx->m_IdxMutex.unlock();	//	unlock the indexes
-    uint32_t simRowIdx = p_Id * seqNo;	//	thread o will fill rows 0 to 9, thread 1 will fill rows 10 to 19, etc. (supposing that m_SeqPerThread = 10)
+    //uint32_t simRowIdx = p_Id * seqNo;	    
     std::string reffilename = std::to_string((int) ctx->m_IdxList[0]) + "_" + std::to_string((int) ctx->m_IdxList[ctx->m_IdxList.size()-1]) + "_ref";
     //for (uint32_t i = first, imax = ctx->m_NextIdx; i < imax; ++i, ++simRowIdx) {
     // } // next sequence
@@ -2438,12 +2438,15 @@ OperatorMlc1(uint32_t p_Id, mlc_context1 * ctx)
 	//const uint32_t seqSize = static_cast<uint32_t>(ctx->m_Cluster.Sequences().size());
 	const uint32_t idxSize = static_cast<uint32_t>(ctx->m_IdxList.size());
 	//const uint32_t seqNo = ctx->m_Cluster.m_SeqPerBloc;
-	const uint32_t seqNo = (uint32_t)(ctx->m_IdxList.size()/ ctx->m_Cluster.m_BlocNo);
+	const uint32_t seqNo = max((uint32_t)(ctx->m_IdxList.size()/ ctx->m_Cluster.m_BlocNo), ctx->m_Cluster.m_SeqPerThread);
 
 	//	create a temporary list of centroids. Accessing directly the main centroid list would need to lock and unlock the mutex once for each sequence !
 	vector<uint32_t> centroidList;
 	centroidList.reserve(2000 + static_cast<uint32_t>(ctx->m_CentroidList.capacity() / ctx->m_NumThread));	//	supposing each thread will manage the same number of groups
-
+        
+        vector<TCluster> groups;
+	groups.reserve(2000 + static_cast<uint32_t>(ctx->m_CentroidList.capacity() / ctx->m_NumThread));
+        
 	while (true) {
 		ctx->m_IdxMutex.lock();										//	lock the indexes
 
@@ -2471,14 +2474,17 @@ OperatorMlc1(uint32_t p_Id, mlc_context1 * ctx)
 			group.ComputeCentroid();
 			group.PrepareCentroid();
 			centroidList.push_back(group.CentralSeqIdx());	//	add the centroid to the local centroid list
-                        ctx->m_Groups.push_back(group);
+                        groups.push_back(group);
 		}
 	} // next bloc of 'seqNo' sequencess
 
 	  //	copy our centroids into the global list
-	ctx->m_CentroidMutex.lock();					//	lock the indexes
+	ctx->m_CentroidMutex.lock();	//lock the indexes
+        uint32_t i =0; 	
 	for (uint32_t idx : centroidList) {
 		ctx->m_CentroidList.push_back(idx);
+                ctx->m_Groups.push_back(groups[i]);
+                i=i+1;
 	}
 	ctx->m_CentroidMutex.unlock();				//	unlock the indexes
 }
@@ -2688,6 +2694,7 @@ TCluster::Mlc_MultiThread(double p_Threshold, vector<uint32_t> & p_IdxSortedList
         i = 0;
         for(TCluster & tempgroup : tempgroups) {
             vector<uint32_t> reflist;
+            vector<uint32_t> srcelist;
             TCluster & group = m_Groups[groupidxList[i]];
             uint32_t cenidx = group.CentralSeqIdx();
             reflist.push_back(group.CentralSeqIdx());
@@ -2712,17 +2719,20 @@ TCluster::Mlc_MultiThread(double p_Threshold, vector<uint32_t> & p_IdxSortedList
             if (tempgroup.Comparisons().size() > 0) {
                 for (const TComparison & comp : tempgroup.Comparisons()) {
                     uint32_t s = comp.SrceIdx();
-                    if(std::find(reflist.begin(), reflist.end(), s) == reflist.end()) {
-                         group.Comparisons().emplace_back(cenidx, s, comp.Sim());			
+                    if(std::find(reflist.begin(), reflist.end(), s) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), s) == srcelist.end()) {
+                         group.Comparisons().emplace_back(s, cenidx, comp.Sim());		
+                         reflist.push_back(s);
                     }  
                     uint32_t r = comp.RefIdx();
-                    if(std::find(reflist.begin(), reflist.end(), r) == reflist.end()) {
-                         group.Comparisons().emplace_back(cenidx, r, comp.Sim());                       
+                    if(std::find(reflist.begin(), reflist.end(), r) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), r) == srcelist.end()) {
+                         group.Comparisons().emplace_back(r, cenidx, comp.Sim());    
+                         reflist.push_back(r);
                     } 
                 } 
                 for (uint32_t id: tempgroup.IdList()){
-                    if (std::find(reflist.begin(), reflist.end(), id) == reflist.end()) {
-                        group.Comparisons().emplace_back(cenidx, id, 1);
+                    if (std::find(reflist.begin(), reflist.end(), id) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), id) == srcelist.end()) {
+                        group.Comparisons().emplace_back(id, cenidx, 1);
+                        reflist.push_back(id);
                     }
                 }
 	    }
@@ -3021,11 +3031,11 @@ TCluster::SaveFullSimilarity( std::string p_DestFilePath, double p_MinSim)
     if (m_ClusterDB->m_Sequences.size() == 0) {
 	return;
     }
-    uint32_t imax = static_cast<uint32_t>(m_ClusterDB->m_Sequences.size());
+    uint32_t smax = static_cast<uint32_t>(m_ClusterDB->m_Sequences.size());
 	//using namespace boost::numeric::ublas;
     vector<uint32_t> idxList;
-    idxList.reserve(imax);
-    for (uint32_t i = 0; i < imax; ++i) {
+    idxList.reserve(smax);
+    for (uint32_t i = 0; i < smax; ++i) {
 	idxList.push_back(i);
     }
 	//compare all  with each other
@@ -3033,8 +3043,8 @@ TCluster::SaveFullSimilarity( std::string p_DestFilePath, double p_MinSim)
     uint32_t numThread = max_(1u, m_NumThread);
    	//	create the thread context
     ccbc_context ctx(0, *this, idxList, 0.0);
-    ctx.m_Sims.resize(numThread * m_SeqPerThread, imax);
-    
+    //ctx.m_Sims.resize(smax, smax);
+    ctx.m_Sims.resize(numThread * m_SeqPerThread, smax);
     if (numThread == 1) {
 		//OperatorInitSrceRef(0, &ctx);
         OperatorCcbc1(0, &ctx);
@@ -3052,51 +3062,56 @@ TCluster::SaveFullSimilarity( std::string p_DestFilePath, double p_MinSim)
             item.join();
 	}
 		//	clear all existing threads
-		threads.clear();
+        threads.clear();
     }
 
     CreateBLastInputFiles(&ctx,numThread);//create input files if using blast
 
 	//	reset the context start index
     ctx.m_NextIdx = 0;
-    while (ctx.m_NextIdx < imax) {
+    //	compute the similarity of the next numThread for all reference sequences that are not yet in a group
+    while (ctx.m_NextIdx < smax) {
+		//for (uint32_t firsti = 0; firsti < imax; firsti += numThread * m_SeqPerThread) {
         uint32_t firsti = ctx.m_NextIdx;
         if (numThread == 1) {
             //OperatorCompareAll(0, &ctx);
-            OperatorCcbc2_Blast(0, &ctx); //if use Blast function
-	}
-	else {
-		vector<std::thread>	threads;
-		threads.reserve(numThread);
+           OperatorCcbc2_Blast(0, &ctx); //if use Blast function
+         }   
+         else {
+            vector<std::thread>	threads;
+            threads.reserve(numThread);
 
-		for (uint32_t i = 0; i < numThread; ++i) {
+            for (uint32_t i = 0; i < numThread; ++i) {
                     //threads.emplace_back(::OperatorCompareAll, i, &ctx);
-                    threads.emplace_back(::OperatorCcbc2_Blast, i, &ctx);
-		}
+                threads.emplace_back(::OperatorCcbc2_Blast, i, &ctx);
+             }
 		//	catch each thread results and wait for all threads to finish
-		for (std::thread & item : threads) {
-			item.join();
-		}
+            for (std::thread & item : threads) {
+                item.join();
+            }
 		//	clear all existing threads
-		threads.clear();
-	}
+            threads.clear();
+        }
 
-	uint32_t simRowIdx = 0;													//double_matrix & sims = ctx.m_Sims;			//	simplify coding
-	for (uint32_t i = firsti; i < ctx.m_NextIdx; ++i) {
+        // ctx.m_Sims[smax-1][smax-1]=1;												//double_matrix & sims = ctx.m_Sims;			//	simplify coding
+    
+        //for (uint32_t i = 0; i < smax; ++i) {
+        uint32_t simRowIdx = 0;
+        for (uint32_t i = firsti; i < ctx.m_NextIdx; ++i) {
             TNFieldBase * srce = ClusterDatabase()->m_Sequences[idxList[i]];
             uint32_t s = srce->RecordId();
-            for (uint32_t j = i; j < imax; ++j) {
-		TNFieldBase * ref = ClusterDatabase()->m_Sequences[idxList[j]];
-		uint32_t r = ref->RecordId();
-		//double sim = max(ctx.m_Sims[simRowIdx][j], ctx.m_Sims[j][simRowIdx]);
+            for (uint32_t j = i; j < smax; ++j) {
+                TNFieldBase * ref = ClusterDatabase()->m_Sequences[idxList[j]];
+                uint32_t r = ref->RecordId();
+                //double sim = max(ctx.m_Sims[i][j], ctx.m_Sims[j][i]);
                 double sim = ctx.m_Sims[simRowIdx][j];
-		if (sim >= p_MinSim) {
+                if (sim >= p_MinSim) {
                     file << r << " " << s << " " << std::to_string(sim) << "\r\n";
-		}
-            }
-             simRowIdx = simRowIdx + 1;
-	}
-    }   
+                }
+            }   
+            simRowIdx = simRowIdx+1;
+        } 
+    }
 	/*TNFieldBase * srce = ClusterDatabase()->m_Sequences[idxList[smax-1]];
 	uint32_t s = srce->RecordId();
 	file << s << " " << s << " 1" << "\r\n";*/
@@ -3109,21 +3124,100 @@ TCluster::SaveFullSimilarity( std::string p_DestFilePath, double p_MinSim)
 void
 TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, int32_t p_TabNo, int32_t p_KneighborNo,  double p_MinSim, double p_Threshold, int32_t & p_Count, int32_t p_Max )
 {
-	if (p_TabNo > 8) {
-		p_TabNo = 8;
-	}
-	static const char tabs_array[][18] = { "\r\n", "\r\n\t", "\r\n\t\t", "\r\n\t\t\t", "\r\n\t\t\t\t", "\r\n\t\t\t\t\t", "\r\n\t\t\t\t\t\t", "\r\n\t\t\t\t\t\t\t", "\r\n\t\t\t\t\t\t\t\t" };
-	const char * begin_line = tabs_array[p_TabNo];
-        BuildSortedIdList();
-	if (m_Groups.size() > 0) {
-            uint32_t numThread = max_(1u, m_NumThread);
+    if (p_TabNo > 8) {
+	p_TabNo = 8;
+    }
+    static const char tabs_array[][18] = { "\r\n", "\r\n\t", "\r\n\t\t", "\r\n\t\t\t", "\r\n\t\t\t\t", "\r\n\t\t\t\t\t", "\r\n\t\t\t\t\t\t", "\r\n\t\t\t\t\t\t\t", "\r\n\t\t\t\t\t\t\t\t" };
+    const char * begin_line = tabs_array[p_TabNo];
+    BuildSortedIdList();
+    if (m_Groups.size() > 0) {
+        uint32_t numThread = max_(1u, m_NumThread);
             //	create the thread context
-            ccbc_context ctx(0, *this, m_IdList, 0.0);
-            uint32_t imax = m_IdList.size();
-            ctx.m_Sims.resize(numThread * m_SeqPerThread, imax);
-    
-            if (numThread == 1) {
+        ccbc_context ctx(0, *this, m_IdList, 0.0);
+            uint32_t smax = m_IdList.size();
+        //ctx.m_Sims.resize(smax, smax);
+        ctx.m_Sims.resize(numThread * m_SeqPerThread, smax);
+        if (numThread == 1) {
 		//OperatorInitSrceRef(0, &ctx);
+            OperatorCcbc1(0, &ctx);
+        }
+        else {
+            vector<std::thread>	threads;
+            threads.reserve(numThread);
+
+            for (uint32_t i = 0; i < numThread; ++i) {
+                //threads.emplace_back(::OperatorInitSrceRef, i, &ctx);
+                threads.emplace_back(::OperatorCcbc1, i, &ctx);
+            }
+		//	catch each thread results and wait for all threads to finish
+            for (std::thread & item : threads) {
+                item.join();
+            }
+		//	clear all existing threads
+            threads.clear();
+        }
+
+        CreateBLastInputFiles(&ctx,numThread);//create input files if using blast
+        	//	reset the context start index
+        ctx.m_NextIdx = 0;        
+        //	compute the similarity of the next numThread for all reference sequences that are not yet in a group
+        while (ctx.m_NextIdx < smax) {
+		//for (uint32_t firsti = 0; firsti < imax; firsti += numThread * m_SeqPerThread) {
+            uint32_t firsti = ctx.m_NextIdx;
+            if (numThread == 1) {
+                //OperatorCompareAll(0, &ctx);
+                OperatorCcbc2_Blast(0, &ctx); //if use Blast function
+            }
+            else {
+                vector<std::thread>	threads;
+                threads.reserve(numThread);
+                for (uint32_t i = 0; i < numThread; ++i) {
+                    //threads.emplace_back(::OperatorCompareAll, i, &ctx);
+                    threads.emplace_back(::OperatorCcbc2_Blast, i, &ctx);
+                }
+                //	catch each thread results and wait for all threads to finish
+                for (std::thread & item : threads) {
+                    item.join();
+                }
+                //clear all existing threads
+                threads.clear();
+            }
+            //ctx.m_Sims[smax-1][smax-1] = 0;												
+            //for (uint32_t i = 0; i < smax; ++i) {
+            uint32_t simRowIdx = 0;
+            for (uint32_t i = firsti; i < ctx.m_NextIdx; ++i) {
+                TNFieldBase * srce = ClusterDatabase()->m_Sequences[m_IdList[i]];
+                uint32_t s = srce->RecordId();
+                for (uint32_t j = i; j < smax; ++j) {
+                    TNFieldBase * ref = ClusterDatabase()->m_Sequences[m_IdList[j]];
+                    uint32_t r = ref->RecordId();
+                    //double sim = max(ctx.m_Sims[i][j], ctx.m_Sims[j][i]);
+                    double sim = ctx.m_Sims[simRowIdx][j];
+                    if (sim >= p_MinSim) {
+                        p_Stream << r << " " << s << " " << std::to_string(sim) << "\r\n";
+                    }
+                }
+                simRowIdx = simRowIdx + 1;
+            }  
+        }    
+        DeleteBLastInputFiles(&ctx); //delete blast inputfile
+		//recursively
+        for ( TCluster & group : m_Groups) {
+            group.SaveSimilarity(p_Stream,  p_idxList,p_TabNo + 1,  p_KneighborNo, p_MinSim, p_Threshold,p_Count, p_Max );
+        }   
+    }
+    else {		
+        BuildSortedIdList();
+		//compare sequences of the group
+        if (m_IdList.size() > 1) {
+            uint32_t numThread = max_(1u, m_NumThread);
+                //	create the thread context
+            ccbc_context ctx(0, *this, m_IdList, 0.0);
+            uint32_t smax = m_IdList.size();
+            //ctx.m_Sims.resize(smax, smax);
+            ctx.m_Sims.resize(numThread * m_SeqPerThread, smax);
+            if (numThread == 1) {
+                    //OperatorInitSrceRef(0, &ctx);
                 OperatorCcbc1(0, &ctx);
             }
             else {
@@ -3131,47 +3225,47 @@ TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, i
                 threads.reserve(numThread);
 
                 for (uint32_t i = 0; i < numThread; ++i) {
-                    //threads.emplace_back(::OperatorInitSrceRef, i, &ctx);
+                        //threads.emplace_back(::OperatorInitSrceRef, i, &ctx);
                     threads.emplace_back(::OperatorCcbc1, i, &ctx);
                 }
-		//	catch each thread results and wait for all threads to finish
+                    //	catch each thread results and wait for all threads to finish
                 for (std::thread & item : threads) {
                     item.join();
                 }
-		//	clear all existing threads
-		threads.clear();
+                    //	clear all existing threads
+                threads.clear();
             }
 
             CreateBLastInputFiles(&ctx,numThread);//create input files if using blast
-
         	//	reset the context start index
-            ctx.m_NextIdx = 0;
-            while (ctx.m_NextIdx < imax) {
+            ctx.m_NextIdx = 0;          
+             //	compute the similarity of the next numThread for all reference sequences that are not yet in a group
+            while (ctx.m_NextIdx < smax) {
                 uint32_t firsti = ctx.m_NextIdx;
                 if (numThread == 1) {
                     //OperatorCompareAll(0, &ctx);
-                    OperatorCcbc2_Blast(0, &ctx); //if use Blast function
+                   OperatorCcbc2_Blast(0, &ctx); //if use Blast function
                 }
                 else {
-                     vector<std::thread>	threads;
+                    vector<std::thread>	threads;
                     threads.reserve(numThread);
-
                     for (uint32_t i = 0; i < numThread; ++i) {
                         //threads.emplace_back(::OperatorCompareAll, i, &ctx);
                         threads.emplace_back(::OperatorCcbc2_Blast, i, &ctx);
                     }
-                    //	catch each thread results and wait for all threads to finish
+                     //	catch each thread results and wait for all threads to finish
                     for (std::thread & item : threads) {
-			item.join();
+                        item.join();
                     }
-                    //	clear all existing threads
+                     //clear all existing threads
                     threads.clear();
-                }
-                uint32_t simRowIdx = 0;														
+                 }
+                //ctx.m_Sims[smax-1][smax-1] = 0;												
+                uint32_t simRowIdx = 0;
                 for (uint32_t i = firsti; i < ctx.m_NextIdx; ++i) {
                     TNFieldBase * srce = ClusterDatabase()->m_Sequences[m_IdList[i]];
                     uint32_t s = srce->RecordId();
-                    for (uint32_t j = i; j < imax; ++j) {
+                    for (uint32_t j = i; j < smax; ++j) {
                         TNFieldBase * ref = ClusterDatabase()->m_Sequences[m_IdList[j]];
                         uint32_t r = ref->RecordId();
                         //double sim = max(ctx.m_Sims[simRowIdx][j], ctx.m_Sims[j][simRowIdx]);
@@ -3179,57 +3273,28 @@ TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, i
                         if (sim >= p_MinSim) {
                             p_Stream << r << " " << s << " " << std::to_string(sim) << "\r\n";
                         }
-                 }
-                simRowIdx = simRowIdx + 1;
-                } 
-            }   
-            DeleteBLastInputFiles(&ctx); //delete blast inputfile
-		//recursively
-            for ( TCluster & group : m_Groups) {
-		group.SaveSimilarity(p_Stream,  p_idxList,p_TabNo + 1,  p_KneighborNo, p_MinSim, p_Threshold,p_Count, p_Max );
-            }
-	}
-	else {		
-            BuildSortedIdList();
-		//compare sequences of the group
-            if (m_IdList.size() > 1) {
-                std::string sourcefilename = std::to_string((int) m_IdList[0]) + "_source";
-                double_matrix sims = OperatorBlast_CCBC(m_IdList,sourcefilename); //only when using Blast
-                std::remove(sourcefilename.c_str());
-			//	don't forget the last one											
-		for (uint32_t i = 0; i < m_IdList.size(); ++i) {
-                    for (uint32_t j = i; j < m_IdList.size(); ++j) {
-			if ((m_IdList[i] == m_CentralSeqIdx) && (m_IdList[j] == m_CentralSeqIdx)) {
-                            continue;
-			}
-			TNFieldBase * srce = ClusterDatabase()->m_Sequences[m_IdList[i]];
-			uint32_t s = srce->RecordId();
-			TNFieldBase * ref = ClusterDatabase()->m_Sequences[m_IdList[j]];
-			uint32_t r = ref->RecordId();
-			double sim = max(sims[i][j], sims[j][i]);
-			if (sim >= p_MinSim) {
-                            p_Stream << r << " " << s << " " << std::to_string(sim) << "\r\n";
-			}
-			if ((p_Count < p_Max) && (sim < p_Threshold)) {                       
+                        if ((p_Count < p_Max) && (sim < p_Threshold)) {                       
                             if (m_IdList[i] != m_CentralSeqIdx && (p_idxList.size() == 0 || std::find(p_idxList.cbegin(), p_idxList.cend(), r) == p_idxList.cend())) {
-				p_idxList.push_back(r); //list of centrality idxes of each sub group
-				p_Count = p_Count + 1;
-                            }
-                            if ((m_IdList[j] != m_CentralSeqIdx) && (p_idxList.size() == 0 || std::find(p_idxList.cbegin(), p_idxList.cend(), s) == p_idxList.cend())) {
-				p_idxList.push_back(s); //list of centrality idxes of each sub group
+                                p_idxList.push_back(r); //list of centrality idxes of each sub group
                                 p_Count = p_Count + 1;
                             }
-			}
+                            if ((m_IdList[j] != m_CentralSeqIdx) && (p_idxList.size() == 0 || std::find(p_idxList.cbegin(), p_idxList.cend(), s) == p_idxList.cend())) {
+                                p_idxList.push_back(s); //list of centrality idxes of each sub group
+                                p_Count = p_Count + 1;
+                            }
+                        }
                     }
-		}
-                
+                    simRowIdx=simRowIdx + 1;
+                }
             }
-            else{
-               TNFieldBase * srce = ClusterDatabase()->m_Sequences[m_CentralSeqIdx];
-               uint32_t s = srce->RecordId();
-               p_Stream << s << " " << s << " " << "1" << "\r\n";
-            }
-	}
+            DeleteBLastInputFiles(&ctx);    									
+        }
+        else{
+            TNFieldBase * srce = ClusterDatabase()->m_Sequences[m_CentralSeqIdx];
+            uint32_t s = srce->RecordId();
+            p_Stream << s << " " << s << " " << "1" << "\r\n";
+        }
+    }
 }
 
 void
@@ -3248,6 +3313,7 @@ TCluster::SaveSimilarity(std::string p_DestFilePath, int32_t p_KneighborNo, doub
     idxList.reserve(p_Last - p_First + 1);
     int32_t p_Count = 0;
     SaveSimilarity(file,  idxList,10,  p_KneighborNo, p_MinSim, p_Threshold, p_Count,p_Max);
+    cout << idxList.size() << endl;
     if (idxList.size() == 0){
 	return;
     }
@@ -3257,8 +3323,8 @@ TCluster::SaveSimilarity(std::string p_DestFilePath, int32_t p_KneighborNo, doub
     uint32_t smax = static_cast<uint32_t>(idxList.size());
 	//	create the thread context
     ccbc_context ctx(0, *this, idxList, 0.0);
+    //ctx.m_Sims.resize(smax, smax);
     ctx.m_Sims.resize(numThread * m_SeqPerThread, smax);
-
     if (numThread == 1) {
             //OperatorInitSrceRef(0, &ctx);
         OperatorCcbc1(0, &ctx);
@@ -3281,44 +3347,42 @@ TCluster::SaveSimilarity(std::string p_DestFilePath, int32_t p_KneighborNo, doub
     CreateBLastInputFiles(&ctx,numThread);
 	//	reset the context start index
     ctx.m_NextIdx = 0;
-    while (ctx.m_NextIdx < smax) {   
+    while (ctx.m_NextIdx < smax) {
+		//for (uint32_t firsti = 0; firsti < imax; firsti += numThread * m_SeqPerThread) {
         uint32_t firsti = ctx.m_NextIdx;
-	if (numThread == 1) {
-            //OperatorCompareAll(0, &ctx);
+        if (numThread == 1) {
+        //OperatorCompareAll(0, &ctx);
             OperatorCcbc2_Blast(0, &ctx); //if use Blast function
-	}
-	else {
+        }
+        else {
             vector<std::thread>	threads;
             threads.reserve(numThread);
             for (uint32_t i = 0; i < numThread; ++i) {
-                    //threads.emplace_back(::OperatorCompareAll, i, &ctx);
+                //threads.emplace_back(::OperatorCompareAll, i, &ctx);
                 threads.emplace_back(::OperatorCcbc2_Blast, i, &ctx);
             }
-		//	catch each thread results and wait for all threads to finish
+            //	catch each thread results and wait for all threads to finish
             for (std::thread & item : threads) {
-		item.join();
+                item.join();
             }
-		//	clear all existing threads
+            //	clear all existing threads
             threads.clear();
-	}
-
-	//ctx.m_Sims[smax - 1][smax - 1] = 1.0;		//	don't forget the last one		
-        uint32_t simRowIdx = 0;		//	simplify coding
-	for (uint32_t i = firsti; i < ctx.m_NextIdx; ++i) {
+        }
+        uint32_t simRowIdx = 0;
+        for (uint32_t i = firsti; i < ctx.m_NextIdx; ++i) {
             TNFieldBase * srce = ClusterDatabase()->m_Sequences[idxList[i]];
             uint32_t s = srce->RecordId();
             for (uint32_t j = i; j < smax; ++j) {			
-		TNFieldBase * ref = ClusterDatabase()->m_Sequences[idxList[j]];
-		uint32_t r = ref->RecordId();
+                TNFieldBase * ref = ClusterDatabase()->m_Sequences[idxList[j]];
+                uint32_t r = ref->RecordId();
                 //double sim = max(ctx.m_Sims[i][j], ctx.m_Sims[j][i]);
                 double sim = ctx.m_Sims[simRowIdx][j];
                 if (sim >= p_MinSim) {
-			file << r << " " << s << " " << std::to_string(sim) << "\r\n";
+                    file << r << " " << s << " " << std::to_string(sim) << "\r\n";
                 }
             }
-            simRowIdx = simRowIdx + 1;
-	}
-    }    
+        }
+    }
     DeleteBLastInputFiles(&ctx); //delete blast inputfile
     bool isError = (file.goodbit != 0);
     file.close();
