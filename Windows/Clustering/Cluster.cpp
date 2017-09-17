@@ -2451,10 +2451,8 @@ TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, i
 		}
 
 		//	step 3 : compare all centroids with all other centroids
-
 		//	reset the context start index
 		ctx.m_NextIdx = 0;
-
 		if (numThread == 1) {
 			OperatorCompareAll(0, &ctx);
 		}
@@ -2496,12 +2494,8 @@ TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, i
 			group.SaveSimilarity(p_Stream,  p_idxList,p_TabNo + 1,  p_KneighborNo, p_MinSim, p_Threshold,p_Count, p_Max );
 		}
 	}
-	else {
-		//if (p_idxList.size() == 0 || std::find(p_idxList.cbegin(), p_idxList.cend(), m_CentralSeqIdx) == p_idxList.cend()) {
-		//	p_idxList.push_back(m_CentralSeqIdx); //list of centrality idxes of each sub group
-		//}
-		vector<uint32_t>	idxList;
-		
+	else {		
+		vector<uint32_t>	idxList;		
 		//	save all sequence IDs of that group
 		if (m_Comparisons.size() > 0) {
 			idxList.push_back(m_CentralSeqIdx);
@@ -2521,7 +2515,6 @@ TCluster::SaveSimilarity(std::ostream & p_Stream, vector<uint32_t> &p_idxList, i
 			//	create the thread context
 			ccbc_context ctx(0, *this, idxList, 0.0);
 			ctx.m_Sims.resize(smax, smax);
-
 			if (numThread == 1) {
 				OperatorInitSrceRef(0, &ctx);
 			}
