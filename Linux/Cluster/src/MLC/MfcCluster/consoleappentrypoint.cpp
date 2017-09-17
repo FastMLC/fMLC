@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
     std::string outfilepath;
     std::string propertytitlepath;
     int nameposition = 0;
+    int namepositionforprediction =0;
     bool correctarguments = true;
     int correctargumentscount = 0;
    // int correctargumentscount2 = 0;
@@ -80,6 +81,9 @@ int main(int argc, char* argv[])
     std::string fullmatrixfilepath;
     std::string sparsematrixfilepath;
     std::string simfilepath;
+    std::string fromthreshold;
+    std::string tothreshold;
+    std::string step;
     if (argc%2==1) // odd number of arguments,
     {
         for (int br1=1; br1 < argc; br1+=2)
@@ -114,7 +118,7 @@ int main(int argc, char* argv[])
                 }
                 //std::cout << "thresholds OK " << optionvalue << std::endl;
             }
-            else if (optionname=="-algorithm")
+            else if (optionname=="-algo")
             {
                 correctargumentscount++;
                 algorithm = static_cast<AlgorithmEnum>(algorithToEnum(optionvalue));
@@ -165,11 +169,24 @@ int main(int argc, char* argv[])
                 d = std::atoi(optionvalue.c_str());
                 //std::cout << "algorithm OK " << optionvalue << std::endl;
             }
+            else if (optionname=="-predictOpt") //for saving sparse similarity matrix
+            {
+                correctargumentscount++;
+                cout << optionvalue << endl;
+                std::vector<std::string> strs;
+                boost::split(strs, optionvalue, boost::is_any_of("-"));
+                fromthreshold = strs[0];
+                tothreshold = strs[1];
+                step = strs[2];
+                namepositionforprediction = std::stoi(strs[3]);
+                //std::cout << "algorithm OK " << optionvalue << std::endl;
+            }
             else if (optionname=="-sim") //for saving sparse similarity matrix
             {
                 correctargumentscount++;
                 simfilepath = optionvalue;
                 //std::cout << "algorithm OK " << optionvalue << std::endl;
+
             }
             else 
             {
@@ -202,6 +219,9 @@ int main(int argc, char* argv[])
         if (nameposition >0){
             business.ComputeFmeasure(nameposition, algorithm);            
         } 
+        if (namepositionforprediction>0){
+            business.PredictOpt(algorithm, namepositionforprediction, infilepath,M,fromthreshold,tothreshold,step);            
+        } 
         if (d>0 & (simfilepath !="")) {
             business.Visualize(infilepath,propertytitlepath,simfilepath, d,K);
         }
@@ -211,7 +231,7 @@ int main(int argc, char* argv[])
      //  std::cout << "Please check the arguments. \n";
      //   std::cout << "Usage: \n";
      //   std::cout << "./Cluster -input inputfilename -output outputfilename \n";
-     //   std::cout << " -thresholds [t1,...] -algorithm SLC/MLC/CCBC/GC -fmeasure fieldnamenumber -saveSSM sparsesimmatrixfilename -saveFSM -fullsimmatrixfilename -visualize 3 \n";
+     //   std::cout << " -thresholds [t1,...] -algo SLC/MLC/CCBC/GC -fmeasure fieldnamenumber -saveSSM sparsesimmatrixfilename -saveFSM -fullsimmatrixfilename -visualize 3 \n";
         
     }
     

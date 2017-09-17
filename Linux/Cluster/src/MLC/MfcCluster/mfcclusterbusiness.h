@@ -30,8 +30,8 @@ class MfcClusterBusiness
 	public:
 		int			LoadSourceFile(std::string loadfilepath);
 		void			CreateReferenceCluster(int32_t fieldNamePos);
-		int			ReadThresholdsForOPTPrediction(wchar_t buffer1[264], wchar_t buffer2[264], wchar_t buffer3[264], int32_t fieldNamePos);
-		uint64_t		m_InputFileWriteTime;
+		int			PredictOpt(int32_t algorithmPos, int32_t inputfieldPos, std::string inFilePath, int32_t minseqnoforMLC, std::string fromthreshold, std::string tothreshold, std::string step);
+                uint64_t		m_InputFileWriteTime;
 
 		std::wstring	m_OutputClusterFilePath;
 		vector<double>	m_Thresholds;						//	thresholds, the threshold to use, one value for all algorithm except the Multi-level MLC. In the interface, use a semi-colon separated list of double in increasing order
@@ -66,7 +66,7 @@ class MfcClusterBusiness
 
 		void makePoints(std::string filename);
 		int startLargeVisWaitForFinish(std::string parameters);
-		std::vector<std::string> split(const std::string &s, char delim);
+                vector<std::string> split(const std::string &s, char delim);
 		void combinePointsWithProperties(std::string inputtitlefilename, std::string inputfilename, std::string outputfilename, std::string coordArchivePath);
 		uint64_t GetFileWriteTime(const wchar_t * p_FilePath);
     

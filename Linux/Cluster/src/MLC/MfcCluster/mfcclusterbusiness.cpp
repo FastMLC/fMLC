@@ -82,59 +82,74 @@ void MfcClusterBusiness::CreateReferenceCluster(int32_t fieldNamePos)
 // 0 is a correct result
 // -1 is The from threshold must be less or equal than the to threshold
 // -2 is 
-int MfcClusterBusiness::ReadThresholdsForOPTPrediction(wchar_t buffer1[264], wchar_t buffer2[264], wchar_t buffer3[264], int32_t fieldNamePos)
+int MfcClusterBusiness::PredictOpt(int32_t algorithmPos, int32_t inputfieldPos, std::string inFilePath, int32_t minseqnoforMLC, std::string fromthreshold, std::string tothreshold, std::string step)
 {
-	m_Step = std::stod(buffer1);
-	double x = std::stod(buffer2);
-	x = std::max(0.0, std::min(x, 1.0));
-	if (x == 0) {
-		m_ToThreshold = 1;
-	}
-	else {
-		m_ToThreshold = x;
-	}
-
-	std::wstring buf1wstring(buffer1);
-	
-	std::wstring buf2string(buffer2);
-	std::wstring buf3wstring(buffer3);
-	std::string buf3string;
-	WStringToString(buf3wstring, buf3string);
-	AlgorithmEnum algo = static_cast<AlgorithmEnum>(fieldNamePos);
-	switch (algo) {
+    vector<string> values = split(fromthreshold,';');
+    m_Step = std::stod(step);
+    if (m_Step <=0 || m_Step >1) {
+	return -1;
+    }
+    AlgorithmEnum algo = static_cast<AlgorithmEnum>(algorithmPos);
+    switch (algo) {
 	default: {
-		x = std::stod(buffer3);
-		x = std::max(0.0, std::min(x, 1.0));
-		m_FromThresholds.push_back(x); //	we use only the last value for all algorithm, except for MLC
-		m_FromThreshold = x;
-		break;
+            double x = std::stod(fromthreshold);
+            x = std::max(0.0, std::min(x, 1.0));
+            m_FromThresholds.push_back(x); //	we use only the last value for all algorithm, except for MLC
+            m_FromThreshold = x;
+            m_ToThreshold = std::stod(tothreshold);
+            break;
 	}
 	case MLC: { //	Multi-level clustering
-		m_FromThresholds.clear();
+             //get tothreshold
+            vector<std::string> tovalues = split(tothreshold, ',');
+            m_ToThreshold = std::stod(tovalues[tovalues.size()-1]);
+            
+            m_FromThresholds.clear();
 		//	split it
-		vector<std::string> values = split(buf3string, ';');
-		uint32_t i = 0;
-		for (auto str : values) {
-			double x = std::stod(str);
-			x = std::max(0.0, std::min(x, 1.0));
-			m_FromThresholds.push_back(x);
-			if (i == values.size() - 1) {
-				m_FromThreshold = x;
-			}
-			i = +1;
+            vector<std::string> values = split(tothreshold, ',');
+            uint32_t i = 0;
+            for (auto str : values) {
+		double x = std::stod(str);
+		x = std::max(0.0, std::min(x, 1.0));
+		m_FromThresholds.push_back(x);
+		if (i == values.size() - 1) {
+                    m_FromThreshold = x;
 		}
-		RemoveDuplicatesAndSort(m_FromThresholds);
-		if (m_FromThresholds.size() == 0) {
-			m_FromThresholds.push_back(m_ToThreshold);
-			m_FromThreshold = m_ToThreshold;
-		}
-		break;
+		i = +1;
+            }
+            RemoveDuplicatesAndSort(m_FromThresholds);
+            if (m_FromThresholds.size() == 0) {
+		m_FromThresholds.push_back(m_ToThreshold);
+		m_FromThreshold = m_ToThreshold;
+            }
+            break;
 	}
+    }
+    if (m_FromThreshold > m_ToThreshold) {
+	return -1;
+    }
+   
+    double bestf = 0.0;
+    double threshold = m_FromThreshold;
+    do {
+	vector<double> thresholds;
+	if (algo == MLC && m_FromThresholds.size() != 1) {
+            for (uint32_t i = 0; i < m_FromThresholds.size() - 1; ++i) {
+		thresholds.push_back(m_FromThresholds[i]);
+            }
 	}
-	if (m_FromThreshold > m_ToThreshold) {
-		return -1;
+	thresholds.push_back(threshold);
+	Cluster(m_FromThresholds,algorithmPos,inputfieldPos,inFilePath,minseqnoforMLC);
+        double f = ComputeFmeasure(inputfieldPos, algo);
+        cout << "Threshold: " << threshold << "\t Fmeasure: " << f << endl;
+	if (f > bestf) {
+            bestf = f;
+            m_OptThreshold = threshold;
 	}
-	return 0;
+        threshold = threshold + m_Step;
+    } while (threshold <= m_ToThreshold);
+    cout << "OPT: " << m_OptThreshold << "\t Best Fmeasure: " << bestf << endl;
+    return 0;
 }
 
 int MfcClusterBusiness::startLargeVisWaitForFinish(std::string parameters)
@@ -187,7 +202,7 @@ void MfcClusterBusiness::makePoints(std::string filename)
 	}
 }
 
-std::vector<std::string> MfcClusterBusiness::split(const std::string &s, char delim)
+std::vector<std::string>MfcClusterBusiness::split(const std::string &s, char delim)
 {
 	std::stringstream ss(s);
 	std::string item;
@@ -378,8 +393,8 @@ int MfcClusterBusiness::Visualize(std::string inputfilepath, std::string titlefi
         }
         
 	int32_t edgeNo = (int32_t)(m_ClusterDatabase.m_Sequences.size() / 100);
-        if (edgeNo <20){
-            edgeNo =20;
+        if (edgeNo <50){
+            edgeNo =50;
         }
 	s = to_string(edgeNo);
 	std::string edges(s.c_str());
@@ -388,7 +403,7 @@ int MfcClusterBusiness::Visualize(std::string inputfilepath, std::string titlefi
 	if (d == 2) {
             largeVIsInputParameters = " -fea 0 -input " + mfcOutFilePath + " -output " + largeVisOutFilePath + " -outdim 2 -threads 4 -log 1 -samples 2 " + edges + " -neigh " + neigs;
 	}
-	std::string finalFilePath = "../DiVE/data/data.js";
+	std::string finalFilePath = "./DiVE/data/data.js";
 	if (inputfilepath.size() == 0){
                 cout << "No input file." << endl;
 		return -1;
@@ -528,7 +543,7 @@ double MfcClusterBusiness::Cluster(const vector<double> & thresholds, int32_t al
 	m_Cluster->SortAllGroups();
 
 	
-
+/*
 	//std::cout stream;
 	std::cout << std::endl << "Threshold = " << thresholds.back();
 	std::cout << ", Cluster contains " << m_Cluster->FinalGroupNo() << " groups";
@@ -536,7 +551,7 @@ double MfcClusterBusiness::Cluster(const vector<double> & thresholds, int32_t al
 		std::cout << " and " << m_RefCluster->ClassifiedSequenceNo() << " classified sequences";
 	}
          std::cout << std::endl;
-	
+*/
 	return f;
 }
 
