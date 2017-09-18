@@ -2559,7 +2559,7 @@ TCluster::Mlc_Mt(double p_Threshold)
 {
 	if (m_ClusterDB->m_Sequences.size() == 0) {
 		return;
-	}
+	}      
 	Mlc_Mt(p_Threshold, 0, static_cast<uint32_t>(m_ClusterDB->m_Sequences.size()) - 1);
 }
 
@@ -3313,7 +3313,6 @@ TCluster::SaveSimilarity(std::string p_DestFilePath, int32_t p_KneighborNo, doub
     idxList.reserve(p_Last - p_First + 1);
     int32_t p_Count = 0;
     SaveSimilarity(file,  idxList,10,  p_KneighborNo, p_MinSim, p_Threshold, p_Count,p_Max);
-    cout << idxList.size() << endl;
     if (idxList.size() == 0){
 	return;
     }
