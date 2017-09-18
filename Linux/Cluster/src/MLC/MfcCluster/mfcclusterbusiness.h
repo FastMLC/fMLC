@@ -54,7 +54,7 @@ class MfcClusterBusiness
 
 		int Visualize(std::string inputfilepath, std::string titlefilepath,std::string simfilepath, int32_t d, int32_t kneighbor);
 		bool m_recordnameextended;
-		double Cluster(const vector<double> & thresholds, int32_t algorithmPos, int32_t inputfieldPos, std::string inFilePath, int32_t minseqnoforMLC);
+		int Cluster(const vector<double> & thresholds, int32_t algorithmPos, int32_t inputfieldPos, std::string inFilePath, int32_t minseqnoforMLC);
 
 
 		bool file_exists(const char *fileName);

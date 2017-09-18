@@ -84,7 +84,7 @@ void MfcClusterBusiness::CreateReferenceCluster(int32_t fieldNamePos)
 // -2 is 
 int MfcClusterBusiness::PredictOpt(int32_t algorithmPos, int32_t inputfieldPos, std::string inFilePath, int32_t minseqnoforMLC, std::string fromthreshold, std::string tothreshold, std::string step)
 {
-    vector<string> values = split(fromthreshold,';');
+    vector<string> values = split(fromthreshold,',');
     m_Step = std::stod(step);
     if (m_Step <=0 || m_Step >1) {
 	return -1;
@@ -106,7 +106,7 @@ int MfcClusterBusiness::PredictOpt(int32_t algorithmPos, int32_t inputfieldPos, 
             
             m_FromThresholds.clear();
 		//	split it
-            vector<std::string> values = split(tothreshold, ',');
+            vector<std::string> values = split(fromthreshold, ',');
             uint32_t i = 0;
             for (auto str : values) {
 		double x = std::stod(str);
@@ -135,11 +135,11 @@ int MfcClusterBusiness::PredictOpt(int32_t algorithmPos, int32_t inputfieldPos, 
 	vector<double> thresholds;
 	if (algo == MLC && m_FromThresholds.size() != 1) {
             for (uint32_t i = 0; i < m_FromThresholds.size() - 1; ++i) {
-		thresholds.push_back(m_FromThresholds[i]);
+		thresholds.push_back(m_FromThresholds[i]);              
             }
 	}
-	thresholds.push_back(threshold);
-	Cluster(m_FromThresholds,algorithmPos,inputfieldPos,inFilePath,minseqnoforMLC);
+	thresholds.push_back(threshold);       
+	Cluster(thresholds,algorithmPos,inputfieldPos,inFilePath,minseqnoforMLC);
         double f = ComputeFmeasure(inputfieldPos, algo);
         cout << "Threshold: " << threshold << "\t Fmeasure: " << f << endl;
 	if (f > bestf) {
@@ -457,7 +457,7 @@ uint64_t MfcClusterBusiness::GetFileWriteTime(const wchar_t * p_FilePath)
 	return fileWriteTime;
 }
 
-double MfcClusterBusiness::Cluster(const vector<double> & thresholds, int32_t algorithmPos, int32_t inputfieldPos, std::string inFilePath, int32_t minseqnoforMLC)
+int MfcClusterBusiness::Cluster(const vector<double> & thresholds, int32_t algorithmPos, int32_t inputfieldPos, std::string inFilePath, int32_t minseqnoforMLC)
 {
     //wchar_t stringC[1032];	
     AlgorithmEnum algo = static_cast<AlgorithmEnum>(algorithmPos);
@@ -474,7 +474,7 @@ double MfcClusterBusiness::Cluster(const vector<double> & thresholds, int32_t al
     
     m_InputFileWriteTime = fileWriteTime;
     if (inFilePath.size()==0) {
-	return 0.0;
+	return 0;
     }
     LoadSourceFile(inFilePath);
     //creat input files for BLAST
@@ -540,7 +540,7 @@ double MfcClusterBusiness::Cluster(const vector<double> & thresholds, int32_t al
 	}
         
 	//	just to have a nicer display
-	m_Cluster->SortAllGroups();
+	//m_Cluster->SortAllGroups();
 
 	
 /*
@@ -552,13 +552,14 @@ double MfcClusterBusiness::Cluster(const vector<double> & thresholds, int32_t al
 	}
          std::cout << std::endl;
 */
-	return f;
+	return m_Cluster->FinalGroupNo();
 }
 
 void MfcClusterBusiness::saveClusterAsText(std::string outputfilename)
 {
     std::wstring woutputfilename;// = new std::wstring(L"" + escienceFolder.c_str);// (escienceFolder.c_str);
     StringToWString(woutputfilename, outputfilename);
+    m_Cluster->SortAllGroups();
     m_Cluster->SaveAsText(woutputfilename.c_str(), m_FieldNamePos, m_FromThresholds.size());
 }
 
@@ -597,6 +598,5 @@ double MfcClusterBusiness::ComputeFmeasure(int nameposition,int32_t algorithmPos
     if (m_FieldNamePos >0){
         f = m_Cluster->F_Measure_Mt(*m_RefCluster);
     }
-    std::cout << "Fmeasure: " << f << endl;
     return f;
 }
