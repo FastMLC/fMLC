@@ -5,7 +5,6 @@ fMLC is the official implementation of the MultiLevel Clustering (MLC) algorithm
 Contact person: For MLC, Duong Vu (d.vu@westerdijkinstitute.nl). For DiVE, Sonja Georgievska (s.georgievska@esciencecenter.nl).
 
 
-
 References
 
 Bolten, E., Schliep, A., Schneckener, S., Schomburg D. & Schrader, R (2001). Clustering protein sequences- structure prediction by transitive homology. Bioinformatics 17, 935-941.
