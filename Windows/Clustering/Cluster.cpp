@@ -1972,6 +1972,9 @@ TCluster::Mlc_MultiThread(double p_Threshold, vector<uint32_t> & p_IdxSortedList
 
 
 	//look for the final group of the temp groups
+	for (TCluster & group : m_Groups) {
+		group.BuildSortedIdList();
+	}
 	uint32_t i = 0;
 	vector<uint32_t> groupidxList;
 	for (TCluster & tempgroup : tempgroups) {
@@ -1979,24 +1982,16 @@ TCluster::Mlc_MultiThread(double p_Threshold, vector<uint32_t> & p_IdxSortedList
 		//look for the final group of r
 		uint32_t i = 0;
 		for (TCluster & group : m_Groups) {
-			if (r == group.CentralSeqIdx()) {
-				groupidxList.push_back(i);
-				break;
-			}
-			if (group.Comparisons().size() > 0) {
-				for (const TComparison & comp : group.Comparisons()) {
-					uint32_t s = comp.SrceIdx();
-					if (r == s) {
-						groupidxList.push_back(i);
-						break;
-					}
-				}
-			}
+			bool found = false;
 			for (uint32_t id : group.IdList()) {
 				if (r == id) {
 					groupidxList.push_back(i);
+					found = true;
 					break;
 				}
+			}
+			if (found ==true) {
+				break;
 			}
 			i = i + 1;
 		}
@@ -2004,48 +1999,12 @@ TCluster::Mlc_MultiThread(double p_Threshold, vector<uint32_t> & p_IdxSortedList
 	}
 	//merge temp groups in to thefinal groups
 	i = 0;
-	for (TCluster & tempgroup : tempgroups) {
-		vector<uint32_t> reflist;
-		vector<uint32_t> srcelist;
+	for (TCluster & tempgroup : tempgroups) {		
 		TCluster & group = m_Groups[groupidxList[i]];
 		uint32_t cenidx = group.CentralSeqIdx();
-		reflist.push_back(group.CentralSeqIdx());
-		if (group.Comparisons().size() > 0) {
-			for (const TComparison & comp : group.Comparisons()) {
-				uint32_t s = comp.SrceIdx();
-				if (std::find(reflist.begin(), reflist.end(), s) == reflist.end()) {
-					reflist.push_back(s);
-				}
-				uint32_t r = comp.RefIdx();
-				if (std::find(reflist.begin(), reflist.end(), s) == reflist.end()) {
-					reflist.push_back(r);
-				}
-			}
-			for (uint32_t id : group.IdList()) {
-				if (std::find(reflist.begin(), reflist.end(), id) == reflist.end()) {
-					reflist.push_back(id);
-				}
-			}
-		}
-
 		if (tempgroup.Comparisons().size() > 0) {
 			for (const TComparison & comp : tempgroup.Comparisons()) {
-				uint32_t s = comp.SrceIdx();
-				if (std::find(reflist.begin(), reflist.end(), s) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), s) == srcelist.end()) {
-					group.Comparisons().emplace_back( s, cenidx, comp.Sim());
-					srcelist.push_back(s);
-				}
-				uint32_t r = comp.RefIdx();
-				if (std::find(reflist.begin(), reflist.end(), r) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), r) == srcelist.end()) {
-					group.Comparisons().emplace_back(r, cenidx, comp.Sim());
-					srcelist.push_back(r);
-				}
-			}
-			for (uint32_t id : tempgroup.IdList()) {
-				if (std::find(reflist.begin(), reflist.end(), id) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), id) == srcelist.end()) {
-					group.Comparisons().emplace_back(id, cenidx, 1);
-					srcelist.push_back(id);
-				}
+				group.Comparisons().emplace_back(comp.SrceIdx(), cenidx, comp.Sim());					
 			}
 		}
 		i = i + 1;
