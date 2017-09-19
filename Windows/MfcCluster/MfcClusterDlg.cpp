@@ -547,7 +547,8 @@ void MfcClusterDlg::OnBnClickedCluster()
 	char str[26];
 	asctime_s(str, sizeof str, &timeinfo);
 	std::ofstream logfile(m_logfilename.c_str(), std::ios_base::out | std::ios_base::app);
-	logfile << "Start clustering " << m_InputFilename.c_str() << ": " << str; 
+	logfile << "Start clustering " << m_Filename << ": " << str; 
+	logfile.close();
 	//	Computations
 	delete m_Cluster;
 	m_Cluster = new TCluster(&m_ClusterDatabase);
@@ -595,6 +596,7 @@ void MfcClusterDlg::OnBnClickedCluster()
 	now = time(0);
 	localtime_s(&timeinfo, &now);
 	asctime_s(str, sizeof str, &timeinfo);
+	logfile.open(m_logfilename.c_str(), std::ios_base::out | std::ios_base::app);
 	logfile << "End: " << str << "\n";
 	logfile.close();
 
