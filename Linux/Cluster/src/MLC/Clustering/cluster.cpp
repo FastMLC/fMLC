@@ -1214,11 +1214,7 @@ TCluster::Mlc_SingleThread(double p_Threshold, vector<uint32_t> & p_IdxSortedLis
 {
 	m_Groups.clear();
 	m_IsSortedGroups = false;
-        
-	//if (m_ClusterDB->m_Sequences.size() < 3 * m_SeqPerBloc || p_IdxSortedList.size() < 3 * m_SeqPerBloc) { //	doesn't make sense to run a MLC for a few sequences. I don't want to manage sequences spread over 1 bloc...
-	//	GClust_St(p_Threshold, p_IdxSortedList);
-	//	return;
-	//}
+       
 	if (m_ClusterDB->m_Sequences.size() < m_ClusterDB->m_MinSeqNoForMLC || p_IdxSortedList.size() < m_ClusterDB->m_MinSeqNoForMLC) { //	doesn't make sense to run a MLC for a few sequences. I don't want to manage sequences spread over 1 bloc...
 		Ccbc_St(p_Threshold, p_IdxSortedList);
 		return;
@@ -1241,22 +1237,19 @@ TCluster::Mlc_SingleThread(double p_Threshold, vector<uint32_t> & p_IdxSortedLis
           
         //create a temp list of groups to store all the groups of the block
         vector<TCluster> tempgroups;
+        tempgroups.reserve(2000);
         
 	//	dispatch the sequences into p_BlocNo cluster groups. Supposing the fasta file is already sorted, put together adjacent sequences in the source file
 	for (uint32_t i = 0, imax = static_cast<int32_t>(p_IdxSortedList.size()); i < imax; i += p_SeqPerBloc) {
-		idxList.clear();
-		/*for (uint32_t j = i, jmax = std::min(imax, i + m_SeqPerBloc); j < jmax; ++j) {
-			uint32_t idx = p_IdxSortedList[j];
-			idxList.push_back(idx);
-		}*/
+		idxList.clear();		
 		for (uint32_t j = i, jmax = std::min(imax, i + p_SeqPerBloc); j < jmax; ++j) {
 			uint32_t idx = p_IdxSortedList[j];
 			idxList.push_back(idx);
 		}
 		//	GClust each cluster and compute the central sequence for each cluster group
 		//std::OutputDebugVector(stream, idxList);
-		GClust_St(p_Threshold, idxList); //use GC to cluster the blocks
-                //Ccbc_St(p_Threshold, idxList);     //use CCBC to cluster the blocks
+		//GClust_St(p_Threshold, idxList); //use GC to cluster the blocks
+                Ccbc_St(p_Threshold, idxList);     //use CCBC to cluster the blocks
 
 		for(TCluster & group : m_Groups) {
 			//stream << L"Computing centroid\r\n";
@@ -1280,80 +1273,45 @@ TCluster::Mlc_SingleThread(double p_Threshold, vector<uint32_t> & p_IdxSortedLis
         //Ccbc_St_Blast(p_Threshold, centroidList);//if using Blast
         
         //look for the final group of the temp groups
-        uint32_t i = 0;
-        vector<uint32_t> groupidxList;
-        for(TCluster & tempgroup : tempgroups) {
-            uint32_t r = tempgroup.CentralSeqIdx();
-            //look for the final group of r
-            uint32_t i = 0;
-            for(TCluster & group : m_Groups) {
-                if (r==group.CentralSeqIdx()){
-                    groupidxList.push_back(i);
-                    break;
-                }
-		if (group.Comparisons().size() > 0) {
-                    for (const TComparison & comp : group.Comparisons()) {
-                        uint32_t s = comp.SrceIdx();
-                        if (r==s){
-                            groupidxList.push_back(i);
-                            break;
-                        }
-		    }
-                } 
-                for (uint32_t id: group.IdList()){
-                    if (r==id){
-                            groupidxList.push_back(i);
-                            break;
-                    }
-                }
-                i=i+1;
-	    }
-            
-        }
-        //merge temp groups in to thefinal groups
-        i = 0;
-        for(TCluster & tempgroup : tempgroups) {
-            vector<uint32_t> reflist;
-            TCluster & group = m_Groups[groupidxList[i]];
-            uint32_t cenidx = group.CentralSeqIdx();
-            reflist.push_back(group.CentralSeqIdx());
-            if (group.Comparisons().size() > 0) {
-                for (const TComparison & comp : group.Comparisons()) {
-                        uint32_t s = comp.SrceIdx();
-                        if(std::find(reflist.begin(), reflist.end(), s) == reflist.end()) {
-                            reflist.push_back(s);
-                        }
-                         uint32_t r = comp.RefIdx();
-                        if(std::find(reflist.begin(), reflist.end(), s) == reflist.end()) {
-                            reflist.push_back(r);
-                        }
+        //look for the final group of the temp groups
+	for (TCluster & group : m_Groups) {
+		group.BuildSortedIdList();
+	}
+	uint32_t i = 0;
+	vector<uint32_t> groupidxList;
+	for (TCluster & tempgroup : tempgroups) {
+		uint32_t r = tempgroup.CentralSeqIdx();
+		//look for the final group of r
+		uint32_t i = 0;
+		for (TCluster & group : m_Groups) {
+			bool found = false;
+			for (uint32_t id : group.IdList()) {
+				if (r == id) {
+					groupidxList.push_back(i);
+					found = true;
+					break;
+				}
+			}
+			if (found ==true) {
+				break;
+			}
+			i = i + 1;
 		}
-                for (uint32_t id: group.IdList()){
-                    if(std::find(reflist.begin(), reflist.end(), id) == reflist.end()) {
-                        reflist.push_back(id);
-                    }
-                }
-            } 
-            
-            if (tempgroup.Comparisons().size() > 0) {
-                for (const TComparison & comp : tempgroup.Comparisons()) {
-                    uint32_t s = comp.SrceIdx();
-                    if(std::find(reflist.begin(), reflist.end(), s) == reflist.end()) {
-                         group.Comparisons().emplace_back(cenidx, s, comp.Sim());			
-                    }  
-                    uint32_t r = comp.RefIdx();
-                    if(std::find(reflist.begin(), reflist.end(), r) == reflist.end()) {
-                         group.Comparisons().emplace_back(cenidx, r, comp.Sim());                       
-                    } 
-                } 
-                for (uint32_t id: tempgroup.IdList()){
-                    if (std::find(reflist.begin(), reflist.end(), id) == reflist.end()) {
-                        group.Comparisons().emplace_back(cenidx, id, 1);
-                    }
-                }
-	    }
-            i=i+1;
-        }
+
+	}
+	//merge temp groups in to thefinal groups
+	i = 0;
+	for (TCluster & tempgroup : tempgroups) {		
+		TCluster & group = m_Groups[groupidxList[i]];
+		uint32_t cenidx = group.CentralSeqIdx();
+		if (tempgroup.Comparisons().size() > 0) {
+			for (const TComparison & comp : tempgroup.Comparisons()) {
+				group.Comparisons().emplace_back(comp.SrceIdx(), cenidx, comp.Sim());					
+			}
+		}
+		i = i + 1;
+	}
+
     /*  
         return;
         
@@ -2660,85 +2618,43 @@ TCluster::Mlc_MultiThread(double p_Threshold, vector<uint32_t> & p_IdxSortedList
 	Ccbc_Mt(p_Threshold, centroidList);
         
         //look for the final group of the temp groups
-        uint32_t i = 0;
-        vector<uint32_t> groupidxList;
-        for(TCluster & tempgroup : tempgroups) {
-            uint32_t r = tempgroup.CentralSeqIdx();
-            //look for the final group of r
-            uint32_t i = 0;
-            for(TCluster & group : m_Groups) {
-                if (r==group.CentralSeqIdx()){
-                    groupidxList.push_back(i);
-                    break;
-                }
-		if (group.Comparisons().size() > 0) {
-                    for (const TComparison & comp : group.Comparisons()) {
-                        uint32_t s = comp.SrceIdx();
-                        if (r==s){
-                            groupidxList.push_back(i);
-                            break;
-                        }
-		    }
-                } 
-                for (uint32_t id: group.IdList()){
-                    if (r==id){
-                            groupidxList.push_back(i);
-                            break;
-                    }
-                }
-                i=i+1;
-	    }
-            
-        }
-        //merge temp groups in to thefinal groups
-        i = 0;
-        for(TCluster & tempgroup : tempgroups) {
-            vector<uint32_t> reflist;
-            vector<uint32_t> srcelist;
-            TCluster & group = m_Groups[groupidxList[i]];
-            uint32_t cenidx = group.CentralSeqIdx();
-            reflist.push_back(group.CentralSeqIdx());
-            if (group.Comparisons().size() > 0) {
-                for (const TComparison & comp : group.Comparisons()) {
-                        uint32_t s = comp.SrceIdx();
-                        if(std::find(reflist.begin(), reflist.end(), s) == reflist.end()) {
-                            reflist.push_back(s);
-                        }
-                         uint32_t r = comp.RefIdx();
-                        if(std::find(reflist.begin(), reflist.end(), s) == reflist.end()) {
-                            reflist.push_back(r);
-                        }
+	for (TCluster & group : m_Groups) {
+		group.BuildSortedIdList();
+	}
+	uint32_t i = 0;
+	vector<uint32_t> groupidxList;
+	for (TCluster & tempgroup : tempgroups) {
+		uint32_t r = tempgroup.CentralSeqIdx();
+		//look for the final group of r
+		uint32_t i = 0;
+		for (TCluster & group : m_Groups) {
+			bool found = false;
+			for (uint32_t id : group.IdList()) {
+				if (r == id) {
+					groupidxList.push_back(i);
+					found = true;
+					break;
+				}
+			}
+			if (found ==true) {
+				break;
+			}
+			i = i + 1;
 		}
-                for (uint32_t id: group.IdList()){
-                    if(std::find(reflist.begin(), reflist.end(), id) == reflist.end()) {
-                        reflist.push_back(id);
-                    }
-                }
-            } 
-            
-            if (tempgroup.Comparisons().size() > 0) {
-                for (const TComparison & comp : tempgroup.Comparisons()) {
-                    uint32_t s = comp.SrceIdx();
-                    if(std::find(reflist.begin(), reflist.end(), s) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), s) == srcelist.end()) {
-                         group.Comparisons().emplace_back(s, cenidx, comp.Sim());		
-                         reflist.push_back(s);
-                    }  
-                    uint32_t r = comp.RefIdx();
-                    if(std::find(reflist.begin(), reflist.end(), r) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), r) == srcelist.end()) {
-                         group.Comparisons().emplace_back(r, cenidx, comp.Sim());    
-                         reflist.push_back(r);
-                    } 
-                } 
-                for (uint32_t id: tempgroup.IdList()){
-                    if (std::find(reflist.begin(), reflist.end(), id) == reflist.end() && std::find(srcelist.begin(), srcelist.end(), id) == srcelist.end()) {
-                        group.Comparisons().emplace_back(id, cenidx, 1);
-                        reflist.push_back(id);
-                    }
-                }
-	    }
-            i=i+1;
-        }
-        
+
+	}
+	//merge temp groups in to thefinal groups
+	i = 0;
+	for (TCluster & tempgroup : tempgroups) {		
+		TCluster & group = m_Groups[groupidxList[i]];
+		uint32_t cenidx = group.CentralSeqIdx();
+		if (tempgroup.Comparisons().size() > 0) {
+			for (const TComparison & comp : tempgroup.Comparisons()) {
+				group.Comparisons().emplace_back(comp.SrceIdx(), cenidx, comp.Sim());					
+			}
+		}
+		i = i + 1;
+	}        
         return;
 /*
 	//stream << L"There is " << centroidList.size() << L" centroids\r\n";
