@@ -491,11 +491,6 @@ void MfcClusterDlg::OnBnClickedCluster()
 	AlgorithmEnum algo = static_cast<AlgorithmEnum>(CO_Algorithm.GetCurSel());
 	bool computeQuality = (CB_ComputeFMeasure.GetCheck() == BST_CHECKED);
 	int32_t fieldNamePos = CO_InputField.GetCurSel();
-	if (algo == MLC && m_Thresholds.size() != 1) {
-		computeQuality = false;
-		//CB_ComputeFMeasure.SetCheck(BST_UNCHECKED);
-	}
-
 	int stepNo = 3;
 	if(computeQuality) {
 		stepNo += 2;
@@ -523,7 +518,7 @@ void MfcClusterDlg::OnBnClickedCluster()
 		LoadSourceFile();
 	}
 
-	if(algo == MLC && m_Thresholds.size() != 1) {
+	if((algo == MLC || algo == MLC_ST ) && m_Thresholds.size() != 1) {
 		computeQuality = false;
 		//CB_ComputeFMeasure.SetCheck(BST_UNCHECKED);
 	}
@@ -738,6 +733,19 @@ void MfcClusterDlg::DrawThresholds()
 			EF_ToThreshold.SetWindowTextW(L"1");
 			break;
 		}
+		case MLC_ST: { //	Multi-level clustering
+			std::wstring thresholdStr;
+			std::wstring tothresholdStr;
+			for (auto x : m_Thresholds) {	//	there is always at least one value
+				thresholdStr += ToString(stringC, x, 4);
+				thresholdStr += L"; ";
+			}
+			thresholdStr.resize(thresholdStr.size() - 2);	//	remove the "; "
+			EF_Threshold.SetWindowTextW(thresholdStr.c_str());
+			EF_FromThreshold.SetWindowTextW(thresholdStr.c_str());
+			EF_ToThreshold.SetWindowTextW(L"1");
+			break;
+		}
 	}
 }
 
@@ -783,6 +791,22 @@ void MfcClusterDlg::ReadThresholds()
 		}
 		case MLC: { //	Multi-level clustering
 			m_Thresholds.clear();	
+			//	split it
+			vector<std::wstring> values = split(buffer, L';');
+			for (auto str : values) {
+				double x = std::stod(str);
+				x = std::max(0.0, std::min(x, 1.0));
+				m_Thresholds.push_back(x);
+			}
+			RemoveDuplicatesAndSort(m_Thresholds);
+			if (m_Thresholds.size() == 0) {
+				St_Status.SetWindowTextW(L"The threshold must be in the range [0.0, 1.0]. For Multi-level clustering, use a ';' separated list such as \"0.4;0.8;0.98\"");
+				m_Thresholds.push_back(0.98);
+			}
+			break;
+		}
+		case MLC_ST: { //	Multi-level clustering with single thread
+			m_Thresholds.clear();
 			//	split it
 			vector<std::wstring> values = split(buffer, L';');
 			for (auto str : values) {
