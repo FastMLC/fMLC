@@ -3,13 +3,17 @@
 
 Dependencies :
 
-    Boost 1.60.0
+    ## Dependencies : 
 
-    Eigen 3.2
+- [Boost 1.60.0](http://www.boost.org/users/history/version_1_60_0.html)
 
-    LargeVis
-    
-    NCBI BLAST
+- [Eigen 3.2](http://eigen.tuxfamily.org/dox-3.2/)
+
+- [LargeVis](https://github.com/lferry007/LargeVis) 
+
+- [DIVE](https://github.com/NLeSC/DiVE)
+
+- [NCBI BLAST](ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
 
 Installation:
 
