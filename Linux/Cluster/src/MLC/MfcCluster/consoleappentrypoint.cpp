@@ -62,7 +62,7 @@ int algorithToEnum(std::string input)
 int main(int argc, char* argv[])
 {
     
-    AlgorithmEnum algorithm = CCBC; // static_cast<AlgorithmEnum>(algorithmPos);
+    AlgorithmEnum algorithm = MLC; // static_cast<AlgorithmEnum>(algorithmPos);
     vector<double> inputthresholds;
     std::string infilepath;
     std::string outfilepath;
