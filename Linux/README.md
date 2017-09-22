@@ -13,7 +13,7 @@ Dependencies :
 
 - [DIVE](https://github.com/NLeSC/DiVE)
 
-- [NCBI BLAST](ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
+- [NCBI BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download)
 
 Installation:
 
