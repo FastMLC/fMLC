@@ -1,4 +1,4 @@
-# fMLCV (Linux version)
+# fMLC (Linux version)
 
 
 Dependencies :
