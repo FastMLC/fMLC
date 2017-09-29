@@ -1577,7 +1577,11 @@ void MfcClusterDlg::Visualize()
 	//MessageBoxW(NULL, static_cast<LPCWSTR>(error.c_str()));
 
 	//ShellExecute(0, 0, L"..\\..\\..\\DiVE\\index.html", 0, 0, SW_SHOW);
-	ShellExecute(0, 0, L"DiVE\\index.html", 0, 0, SW_SHOW);
+	//ShellExecute(0, 0, L"DiVE\\index.html", 0, 0, SW_SHOW);
+	CString command = L"DiVE\\index.html";
+	if (system(NULL)) {
+		system(CStringA(command));
+	}
 	
 }
 
