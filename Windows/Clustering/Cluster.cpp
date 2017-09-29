@@ -204,13 +204,49 @@ TCluster::Save(std::ostream & p_Stream, uint32_t p_FieldNamePos, uint32_t p_TabN
 		for (uint32_t i = 0; i < p_MaxTabNo - p_TabNo; ++i) {
 			p_Extension = p_Extension + "Central id: " + std::to_string(ref->RecordId()) + "\t" ;
 		}
+		std::string refrecordname = m_ClusterDB->m_Sequences[CentralSeqIdx()]->RecordName();
+		//get suggested names
+		string suggestedname = "";
+		vector<string> namelist;
+		vector<int> namecounts;
+		string fieldname = clustering::StrainName(refrecordname, p_FieldNamePos);
+		if (fieldname != "") {
+			namelist.push_back(clustering::StrainName(refrecordname, p_FieldNamePos));
+			namecounts.push_back(1);
+		}
+		if (m_Comparisons.size() > 0) {
+			for (const TComparison & comp : m_Comparisons) {
+				uint32_t s = comp.SrceIdx();
+				TNFieldBase * srce = m_ClusterDB->m_Sequences[s];
+				std::string recordname = m_ClusterDB->m_Sequences[s]->RecordName();
+				uint32_t clusterindex = 0;
+				fieldname = clustering::StrainName(recordname, p_FieldNamePos);
+				if (fieldname != "") {
+					std::vector<string>::iterator pos = std::find(namelist.begin(), namelist.end(), fieldname);
+					if (pos == namelist.end()) {
+						namelist.push_back(clustering::StrainName(recordname, p_FieldNamePos));
+						namecounts.push_back(1);
+					}
+					else {
+						size_t i = std::distance(namelist.begin(),pos);
+						namecounts[i] = namecounts[i] + 1;
+					}
+
+				}
+			}
+		}
+		std::vector<int>::iterator maxpos = std::max_element(namecounts.begin(), namecounts.end());
+		size_t i = std::distance(namecounts.begin(), maxpos);
+		suggestedname = namelist[i];
 		p_Stream << ref->RecordId();
 		p_Stream << "\t";
-		std::string refrecordname = m_ClusterDB->m_Sequences[CentralSeqIdx()]->RecordName();
 		p_Stream << refrecordname;
 		p_Stream << "\t";
-		uint32_t refclusterindex = GetReferenceClusterIndex(refrecordname,p_FieldNamePos);
-		p_Stream << refclusterindex;
+//		uint32_t refclusterindex = GetReferenceClusterIndex(refrecordname,p_FieldNamePos);
+//		p_Stream << refclusterindex;
+		p_Stream << clustering::StrainName(refrecordname, p_FieldNamePos);
+		p_Stream << "\t";
+		p_Stream << suggestedname;
 		p_Stream << "\t";
 		p_Stream << p_Extension;
 		p_Stream << "\r\n";
@@ -224,13 +260,16 @@ TCluster::Save(std::ostream & p_Stream, uint32_t p_FieldNamePos, uint32_t p_TabN
 				p_Stream << recordname;
 				p_Stream << "\t";
 				uint32_t clusterindex = 0;
-				if (refrecordname == recordname) {
+				/*if (refrecordname == recordname) {
 					clusterindex = refclusterindex;
 				}
 				else {
 					clusterindex = GetReferenceClusterIndex(recordname, p_FieldNamePos);
 				}
-				p_Stream << refclusterindex;
+				p_Stream << refclusterindex;*/
+				p_Stream << clustering::StrainName(recordname, p_FieldNamePos);
+				p_Stream << "\t";
+				p_Stream << suggestedname;
 				p_Stream << "\t";
 				p_Stream << p_Extension;
 				p_Stream << "\r\n";		
@@ -302,7 +341,7 @@ TCluster::SaveAsText(const wchar_t * p_DestFilePath, uint32_t p_FieldNamePos, ui
 	if (file.fail()) {
 		return true; //	error
 	}
-	file << "Sequence id" << "\t" << "Sequence name" << "\t"  << "Reference cluster index" << "\t" ;
+	file << "Sequence id" << "\t" << "Sequence name" << "\t"  << "Reference name" << "\t" << "Suggested name" << "\t";
 	for (uint32_t i = 0; i < p_MaxTabNo ; ++i) {
 		file << "Level" << " " << i + 1 << "\t";
 	}
@@ -2637,13 +2676,13 @@ TCluster::SaveSimilarity(const wchar_t * p_DestFilePath, int32_t p_KneighborNo, 
 
 
 void
-TCluster::ExtendRecordNames(uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string  p_Extension) const
+TCluster::ExtendRecordNames(uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string  p_Extension, uint32_t p_FieldNamePos) const
 {
 	if (m_Groups.size() > 0) {	
 		//recursively
 		for (TCluster group : m_Groups) {
 			TNFieldBase * seq = ClusterDatabase()->m_Sequences[group.CentralSeqIdx()];
-			group.ExtendRecordNames( p_TabNo + 1, p_MaxTabNo, p_Extension + "|Central id: " + std::to_string(seq->RecordId()));
+			group.ExtendRecordNames( p_TabNo + 1, p_MaxTabNo, p_Extension + "|Central id: " + std::to_string(seq->RecordId()),p_FieldNamePos);
 		}
 	}
 	else {
@@ -2652,11 +2691,47 @@ TCluster::ExtendRecordNames(uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string  
 		for (uint32_t i = 0; i < p_MaxTabNo - p_TabNo; ++i) {
 			p_Extension = p_Extension + "|Central id: " + std::to_string(srce->RecordId());;
 		}
-		srce->SetRecordName(srce->RecordName() + p_Extension);
+		
+		std::string refrecordname = srce->RecordName();
+		//get suggested names
+		string suggestedname = "";
+		vector<string> namelist;
+		vector<int> namecounts;
+		string fieldname = clustering::StrainName(refrecordname, p_FieldNamePos);
+		if (fieldname != "") {
+			namelist.push_back(clustering::StrainName(refrecordname, p_FieldNamePos));
+			namecounts.push_back(1);
+		}
 		if (m_Comparisons.size() > 0) {
 			for (const TComparison & comp : m_Comparisons) {
-				TNFieldBase * srce = ClusterDatabase()->m_Sequences[comp.SrceIdx()];				
-				srce->SetRecordName(srce->RecordName() + p_Extension);				
+				uint32_t s = comp.SrceIdx();
+				TNFieldBase * srce = m_ClusterDB->m_Sequences[s];
+				std::string recordname = m_ClusterDB->m_Sequences[s]->RecordName();
+				uint32_t clusterindex = 0;
+				fieldname = clustering::StrainName(recordname, p_FieldNamePos);
+				if (fieldname != "") {
+					std::vector<string>::iterator pos = std::find(namelist.begin(), namelist.end(), fieldname);
+					if (pos == namelist.end()) {
+						namelist.push_back(clustering::StrainName(recordname, p_FieldNamePos));
+						namecounts.push_back(1);
+					}
+					else {
+						size_t i = std::distance(namelist.begin(), pos);
+						namecounts[i] = namecounts[i] + 1;
+					}
+
+				}
+			}
+		}
+		std::vector<int>::iterator maxpos = std::max_element(namecounts.begin(), namecounts.end());
+		size_t i = std::distance(namecounts.begin(), maxpos);
+		suggestedname = namelist[i];
+		srce->SetRecordName(srce->RecordName() + "|" +  suggestedname  + p_Extension);
+		if (m_Comparisons.size() > 0) {
+			for (const TComparison & comp : m_Comparisons) {
+				TNFieldBase * srce = ClusterDatabase()->m_Sequences[comp.SrceIdx()];	
+				string name = srce->RecordName();
+				srce->SetRecordName(srce->RecordName() + "|" + suggestedname + p_Extension);
 			}
 		}		
 	}

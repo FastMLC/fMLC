@@ -23,7 +23,7 @@ public:
 	bool SaveAsText(const wchar_t * p_DestFilePath, uint32_t p_FieldNamePos,uint32_t p_MaxTabNo ) const;
 	void Save(std::ostream & p_Stream, uint32_t p_FieldNamePos, uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string  p_Extension) const;
 	void Save(std::wostringstream & p_Stream, uint32_t p_TabNo) const;
-	void ExtendRecordNames( uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string p_Extension) const;
+	void ExtendRecordNames( uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string p_Extension, uint32_t p_FieldNamePos) const;
 	
 	void SaveFullSimilarity(const wchar_t * p_DestFilePath, double p_MinSim);
 	void SaveSimilarity(const wchar_t * p_DestFilePath, int32_t p_KneighborNo, double p_MinSim, double p_Threshold, int32_t p_Max);
