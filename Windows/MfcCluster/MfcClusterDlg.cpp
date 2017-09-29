@@ -26,7 +26,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
-
+#include <iterator> 
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -458,6 +458,7 @@ void MfcClusterDlg::OnEnChangeInputFilePath()
 	else {
 		CO_InputField.SetCurSel(0);
 	}
+	m_recordnameextended = false;
 }
 
 //	return the FILETIME structure containing the last change date-time of the given file
@@ -1624,13 +1625,14 @@ void MfcClusterDlg::OnBnClickedSavefullsimilarity()
 void MfcClusterDlg::OnBnClickedSave()
 {
 	//	save clusters in Fasta file
-	if (m_recordnameextended = true){
-		if (MessageBox(L"You have saved the result. Do you wish to continue?", L"Warning", MB_YESNOCANCEL) == IDNO) {
+	if (m_recordnameextended == true){
+		if (MessageBox(L"You have saved the clustering result in the input file. Do you wish to continue?", L"Warning", MB_YESNOCANCEL) != IDYES) {
 			Wait(L"", 0.0);
 			return;
 		}
 	}
-	m_Cluster->ExtendRecordNames(0, (uint32_t)m_Thresholds.size() ,"");
+	uint32_t fieldNamePos = CO_InputField.GetCurSel();
+	m_Cluster->ExtendRecordNames(0, (uint32_t)m_Thresholds.size() ,"", fieldNamePos);
 	m_recordnameextended = true;
 	//	Save results into the fasta file
 	std::ofstream file(m_InputFilename.c_str(), std::ofstream::binary);
@@ -1656,7 +1658,7 @@ void MfcClusterDlg::OnBnClickedSave()
 		std::getline(titlefile, line);
 		titlefile.close();
 		std::ofstream titlefile(m_TitleFilename.c_str(), std::ofstream::binary);
-		titlefile << line;
+		titlefile << line + "|Suggested name";
 		for (uint32_t i = 0; i < m_Thresholds.size(); ++i) {
 			titlefile << "|Level" << to_string(i + 1) ;
 		}

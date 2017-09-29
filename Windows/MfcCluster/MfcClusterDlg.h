@@ -98,7 +98,7 @@ public:
 	afx_msg void OnBnClickedCluster();
 	afx_msg void OnEnChangeInputFilePath();
 	void Visualize();
-	bool m_recordnameextended;
+	bool m_recordnameextended=false;
 	double Cluster(const vector<double> & thresholds);
 
 	// The input field in the record name found in the input fasta file
