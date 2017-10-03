@@ -47,7 +47,7 @@ Output file path: The path to save the clustering result, or to save the predict
 
 -Save sparse SM: Save a sparse similarity matrix based on the clustering result.
 
--Save full SM: Save a complete similarity matrix.
+-Save complete SM: Save a complete similarity matrix.
 
 -From: The lower boundary threshold for the prediction. 
 
