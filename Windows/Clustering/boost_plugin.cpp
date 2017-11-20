@@ -43,7 +43,7 @@ void RemoveDuplicatesAndSort(vector<T> & p_List)
 		return;
 	}
 	std::sort(p_List.begin(), p_List.end());	//	sort ascending
-
+//remove duplicate
 	size_t d = 0;
 	for (size_t s = 1; s < smax; ++s) { //	s = source, d = dest
 		if (p_List[s] > p_List[d]) { //	keep it
@@ -57,6 +57,22 @@ void RemoveDuplicatesAndSort(vector<T> & p_List)
 template void RemoveDuplicatesAndSort<uint32_t>(vector<uint32_t> &);
 template void RemoveDuplicatesAndSort<uint64_t>(vector<uint64_t> &);
 template void RemoveDuplicatesAndSort<double>(vector<double> &);
+
+//	in place sorting and removing of duplicates
+template<class T>
+void Sort(vector<T> & p_List)
+{
+	size_t smax = p_List.size();
+	if (smax <= 1) {
+		return;
+	}
+	std::sort(p_List.begin(), p_List.end());	//	sort ascending					
+}
+
+//	force compilation
+template void Sort<uint32_t>(vector<uint32_t> &);
+template void Sort<uint64_t>(vector<uint64_t> &);
+template void Sort<double>(vector<double> &);
 
 
 //	removing of duplicates, no sorting.
