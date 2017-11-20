@@ -864,7 +864,7 @@ bool MfcClusterDlg::ReadThresholdsForOPTPrediction()
 			}
 			i = +1;
 		}
-		RemoveDuplicatesAndSort(m_FromThresholds);
+		Sort(m_FromThresholds);
 		if (m_FromThresholds.size() == 0) {
 			St_Status.SetWindowTextW(L"The threshold must be in the range [0.0, 1.0]. For Multi-level clustering, use a ';' separated list such as \"0.4;0.8;0.98\"");
 			m_FromThresholds.push_back(m_ToThreshold);
