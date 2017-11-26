@@ -6,6 +6,11 @@ Please cite the tool with its DOI if you are using it in your scientific publica
 
 fMLC is the official implementation of the MultiLevel Clustering (MLC) algorithm decribed in [Vu D. et al. 2014](https://www.nature.com/articles/srep06837) , used to cluster massive DNA sequences. fMLC was initially implemented by Szaniszlo Szoke and further developed by Duong Vu. It is written in C++ and supports multi-threaded parallelism. fMLC is also integrated with an interactive web-based tool called [DIVE](https://github.com/NLeSC/DiVE) to visualize the resulting DNA sequences based embeddings in 2D or 3D. The work is financially supported by the Westerdijk Fungal Biodiversity Institute and the Netherlands eScience Center.
 
+[Download](http://www.westerdijkinstitute.nl/Download/SmallDatasetOf4KYeastITSSequences.zip) a small demo dataset (circa 4K Yeast ITS Sequences).
+
+[Download](http://www.westerdijkinstitute.nl/Download/LargeDatasetOf350KITSSequences.zip) a large demo dataset (circa 350K IT sequences). 
+
+
 Contact person: Duong Vu (d.vu@westerdijkinstitute.nl)
 
 
