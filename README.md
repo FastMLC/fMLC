@@ -18,8 +18,9 @@ fMLC is the official implementation of the MultiLevel Clustering (MLC) algorithm
 
 [Download](http://www.westerdijkinstitute.nl/Download/LargeDatasetOf350KITSSequences.zip) a large demo dataset (circa 350K IT sequences). 
 
-When installing and running fMLC together with DiVE, a .json file containing the 3D coordinates and metadata of the original data will reside in the 'DiVE/data' folder. This file can be used for visualization by external applications as well. 
+## Results
 
+The clustering and visualization results of the two datasets can be found at https://github.com/FastMLC/fMLC/tree/master/data.
 
 ## Contact person 
 
