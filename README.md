@@ -20,7 +20,7 @@ fMLC is the official implementation of the MultiLevel Clustering (MLC) algorithm
 
 ## Results
 
-After clustering the DNA sequences by fMLC, the grouping of the sequences can be saved as output of fMLC. A sparse (or complete) similarity matrix can also be saved in the folder where the dataset is given, to capture the similarity structure of the sequences. Based on this similarity matrix, the coordiates of the sequences can be computed using LargeVis and saved in the folder LargeVis/. Finally, a json file containing the coordinates and metadata of the sequences is resided in the folder DiVE/data folder as an input of DiVE to visualize the data. This json file can be used for visualization by external applications as well.The clustering and visualization results of the two datasets can be found at https://github.com/FastMLC/fMLC/tree/master/data.
+After clustering the DNA sequences by fMLC, the groupings of the sequences can be saved as output of fMLC. A sparse (or complete) similarity matrix can be saved in the folder where the dataset is given, to capture the similarity structure of the sequences. Based on this similarity matrix, the coordiates of the sequences can be computed using LargeVis and saved in the folder LargeVis/. Finally, a json file containing the coordinates and metadata of the sequences is resided in the folder DiVE/data folder as an input of DiVE to visualize the data. This json file can be used for visualization by external applications as well.The clustering and visualization results of the two datasets can be found at https://github.com/FastMLC/fMLC/tree/master/data.
 
 ## Contact person 
 
