@@ -339,7 +339,6 @@ bool is_file_exist(const char *fileName)
 void MfcClusterDlg::OnEnChangeInputFilePath()
 {
 	St_Status.SetWindowTextW(L"");
-	
 	CO_InputField.Clear();
 	CO_InputField.ResetContent();
 	//	read the first line and update the reference field combo box
@@ -1610,10 +1609,25 @@ void MfcClusterDlg::OnBnClickedSavesimilarity()
 
 void MfcClusterDlg::OnBnClickedSavefullsimilarity()
 {
-	// TODO: Add your control notification handler code here
+	CString inFilePath;
+	EB_InputFilePath.GetWindowTextW(inFilePath);
+	uint64_t fileWriteTime = GetFileWriteTime(static_cast<const wchar_t *>(inFilePath));
 	//get path for saving similarity 
-	if(m_ClusterDatabase.m_Sequences.size() == 0) {
-		return;
+	if(m_ClusterDatabase.m_Sequences.size() == 0 || m_InputFilename != inFilePath.GetBuffer() || m_InputFileWriteTime != fileWriteTime) {
+		int stepNo = 3;
+		double dx = 1.0 / stepNo, x = dx;
+		m_InputFilename = inFilePath.GetBuffer();
+		m_InputFileWriteTime = fileWriteTime;
+		if (m_InputFilename.size() == 0) {
+			MessageBox(L"Please select a source fasta file", L"Warning", MB_ICONWARNING | MB_OK);
+			Wait(L"", 0.0);
+			return;
+		}
+		Wait(L"Loading source file ...", x);		x += dx;
+		LoadSourceFile();
+		delete m_Cluster;
+		m_Cluster = new TCluster(&m_ClusterDatabase);
+		//return;
 	}
 	CString fullfilename = CString(m_InputFilePath.c_str()) + CString(m_Filename.c_str()) + L".sim";
 	//	Save similarity in a file
