@@ -13,10 +13,11 @@ fMLC is the official implementation of the MultiLevel Clustering (MLC) algorithm
 [Linux](https://github.com/FastMLC/fMLC/tree/master/Linux)
 
 ## Data
+There are two datasets available as inputs for fMLC. The "small" dataset contains ~4000 ITS yeast sequences, checked and validated by the specialists at the Westerdijk Fungal Biodiversity Institute. This dataset were analyzed and released in Vu D. et al. 2016. The "large" dataset contains ~350K ITS fungal sequences downloaded from GenBank (https://www.ncbi.nlm.nih.gov/) which was used in Vu D. et al. 2014 to evaluate the speed of MLC.
 
-[Download](http://www.westerdijkinstitute.nl/Download/SmallDatasetOf4KYeastITSSequences.zip) a small demo dataset (circa 4K Yeast ITS Sequences).
+[Download](http://www.westerdijkinstitute.nl/Download/SmallDatasetOf4KYeastITSSequences.zip) the small demo dataset. 
 
-[Download](http://www.westerdijkinstitute.nl/Download/LargeDatasetOf350KITSSequences.zip) a large demo dataset (circa 350K IT sequences). 
+[Download](http://www.westerdijkinstitute.nl/Download/LargeDatasetOf350KITSSequences.zip) the large demo dataset. 
 
 ## Results
 
