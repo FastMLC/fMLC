@@ -1,6 +1,11 @@
+# Citation
+
+Please cite the following paper if you are using the tool:
+
+D Vu, S Georgievska, S Szoke, A Kuzniar, V Robert; fMLC: Fast Multi-Level Clustering and Visualization of Large Molecular Datasets, Bioinformatics, btx810, https://doi.org/10.1093/bioinformatics/btx810
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.926820.svg)](https://doi.org/10.5281/zenodo.926820)
 
-Please cite the tool with its DOI if you are using it in your scientific publication. 
 
 # fMLC
 
