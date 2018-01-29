@@ -7,7 +7,9 @@ fMLC is the official implementation of the MultiLevel Clustering (MLC) algorithm
 
 Please cite the following paper if you are using fMLC:
 
-D Vu, S Georgievska, S Szoke, A Kuzniar, V Robert. fMLC: Fast Multi-Level Clustering and Visualization of Large Molecular Datasets, Bioinformatics, btx810, https://doi.org/10.1093/bioinformatics/btx810
+D Vu, S Georgievska, S Szoke, A Kuzniar, V Robert. fMLC: Fast Multi-Level Clustering and Visualization of Large Molecular Datasets, Bioinformatics, btx810, https://doi.org/10.1093/bioinformatics/btx810 
+
+[Pdf verion](https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btx810/4747887?guestAccessKey=da7a1811-354a-4445-8084-cae44ccafd6f)
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.926820.svg)](https://doi.org/10.5281/zenodo.926820)
 
