@@ -47,7 +47,7 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
-	void			LoadSourceFile();
+	int			LoadSourceFile();
 	void			CreateReferenceCluster();
 	void			DrawThresholds();
 	void			DrawOptThresholds();
@@ -134,8 +134,10 @@ public:
 	CMFCEditBrowseCtrl EB_InputFilePath;
 	// the name of the output file for the computed cluster
 	CMFCEditBrowseCtrl EB_OutputFilePath;
+	CMFCButton PB_Export;
+	CMFCButton PB_SaveFastaFiles;
+
 	afx_msg void OnBnClickedExport();
-	CButton PB_Export;
 	afx_msg void OnBnClickedFinallevel();
 	afx_msg void OnBnClickedComputefmeasure();
 	afx_msg void OnBnClickedOptimize();
@@ -144,4 +146,5 @@ public:
 	afx_msg void OnBnClickedSavesimilarity();
 	afx_msg void OnBnClickedSavefullsimilarity();
 	afx_msg void OnBnClickedSave();
+	afx_msg void OnBnClickedSavefastafiles();
 };

@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <iterator> 
 
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #define use_CRT_SECURE_NO_WARNINGS
@@ -118,6 +119,7 @@ void MfcClusterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, EB_INPUT_FILE_PATH, EB_InputFilePath);
 	DDX_Control(pDX, EB_OUTPUT_PATH, EB_OutputFilePath);
 	DDX_Control(pDX, PB_EXPORT, PB_Export);
+	DDX_Control(pDX, PB_SAVEFASTAFILES, PB_SaveFastaFiles);
 }
 
 BEGIN_MESSAGE_MAP(MfcClusterDlg, CDialogEx)
@@ -137,6 +139,8 @@ BEGIN_MESSAGE_MAP(MfcClusterDlg, CDialogEx)
 	ON_BN_CLICKED(PB_SaveSimilarity, &MfcClusterDlg::OnBnClickedSavesimilarity)
 	ON_BN_CLICKED(PB_SaveFullSimilarity, &MfcClusterDlg::OnBnClickedSavefullsimilarity)
 	ON_BN_CLICKED(PB_SAVE, &MfcClusterDlg::OnBnClickedSave)
+	ON_BN_CLICKED(PB_SAVEFASTAFILES, &MfcClusterDlg::OnBnClickedSavefastafiles)
+	
 END_MESSAGE_MAP()
 
 
@@ -515,7 +519,9 @@ void MfcClusterDlg::OnBnClickedCluster()
 			return;
 		}
 		Wait( L"Loading source file ...", x);		x += dx;
-		LoadSourceFile();
+		if (LoadSourceFile() > 0) {
+			return;
+		}
 	}
 
 	if((algo == MLC || algo == MLC_ST ) && m_Thresholds.size() != 1) {
@@ -668,20 +674,21 @@ void MfcClusterDlg::OnBnClickedExport()
 	Wait(L"Ready", 0.0);
 }
 
-void MfcClusterDlg::LoadSourceFile()
+int MfcClusterDlg::LoadSourceFile()
 {
 	if(m_InputFilename.empty()) {
 		St_Status.SetWindowTextW(L"Please choose an input fasta file as the source of the sequences to cluster");
-		return;
+		return (1);
 	}
 	St_Status.SetWindowTextW((L"Loading file " + m_InputFilename).c_str());
 	//	load the reference cluster
 	bool isdna = true;
 	if(m_ClusterDatabase.LoadFastaFile(m_InputFilename.c_str(), isdna, m_FieldNamePos) != 0) {
 		St_Status.SetWindowTextW(L"An error occured when loading the input fasta file");
-		return;
+		return (1);
 	}
 	St_Status.SetWindowTextW(L"Ready");
+	return (0);
 }
 
 
@@ -1401,6 +1408,9 @@ void combinePointsWithProperties(CString inputtitlefilename, CString inputfilena
 	////
 	while (std::getline(infile, line))
 	{
+		if (line == "") {
+			continue;
+		}
 		fileindex++;
 		std::vector<std::string> properties = split(line, '|');
 		/*std::string id(properties.at(0).c_str());
@@ -1412,9 +1422,9 @@ void combinePointsWithProperties(CString inputtitlefilename, CString inputfilena
 		CString firstline = L"\"";
 		if (fileindex == 1) outline = L"\"";
 		else outline = L",\"";
-
+		int32_t n = clustering::StrainId(id);
+		id = to_string(n);
 		it = pointMap.find(id);
-
 		if (it != pointMap.end())
 		{
 			Point pointmy = pointMap[id];
@@ -1683,3 +1693,23 @@ void MfcClusterDlg::OnBnClickedSave()
 		titlefile.close();
 	}
 }
+
+
+void MfcClusterDlg::OnBnClickedSavefastafiles()
+{
+	// TODO: Add your control notification handler code here
+	if (m_Cluster == nullptr) {
+		MessageBox(L"Please run a computation before exporting the resulting cluster", L"Warning", MB_ICONWARNING | MB_OK);
+		Wait(L"", 0.0);
+		return;
+	}
+	
+	//	Create a folder to save
+	CString folderpath = CString(m_InputFilePath.c_str()) + CString(m_Filename.c_str()) + L"_Clusters" ;
+	system(CStringA(L"mkdir " +  folderpath));
+	Wait(L"Saving clusters as fasta files ...", 0.3);
+	m_Cluster->SaveAsFastaFiles(folderpath);
+	Wait(L"Ready", 0.0);
+}
+
+
