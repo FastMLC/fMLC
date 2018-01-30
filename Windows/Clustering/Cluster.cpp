@@ -188,14 +188,14 @@ uint32_t TCluster::GetReferenceClusterIndex(std::string p_RecordName, uint32_t p
 
 //	Save into a UTF-8 file
 void
-TCluster::Save(std::ostream & p_Stream, uint32_t p_FieldNamePos, uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string  p_Extension) const
+TCluster::Save(std::ostream & p_Stream, uint32_t p_FieldNamePos, uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string  p_Extension, uint32_t & p_ClusterIndex) const
 {
 	
 	if (m_Groups.size() > 0) {
 		//recursively
 		for (TCluster group : m_Groups) {
 			TNFieldBase * seq = ClusterDatabase()->m_Sequences[group.CentralSeqIdx()];
-			group.Save(p_Stream, p_FieldNamePos, p_TabNo+1,p_MaxTabNo, p_Extension + "Central id: " + std::to_string(seq->RecordId()) + "\t" );
+			group.Save(p_Stream, p_FieldNamePos, p_TabNo + 1, p_MaxTabNo, p_Extension + "Central id: " + std::to_string(seq->RecordId()) + "\t", p_ClusterIndex);
 		}
 	}
 	else {
@@ -235,10 +235,15 @@ TCluster::Save(std::ostream & p_Stream, uint32_t p_FieldNamePos, uint32_t p_TabN
 				}
 			}
 		}
-		std::vector<int>::iterator maxpos = std::max_element(namecounts.begin(), namecounts.end());
-		size_t i = std::distance(namecounts.begin(), maxpos);
-		suggestedname = namelist[i];
+		if (namelist.size() >0 ){
+			std::vector<int>::iterator maxpos = std::max_element(namecounts.begin(), namecounts.end());
+			size_t i = std::distance(namecounts.begin(), maxpos);
+			suggestedname = namelist[i];
+		}
 		p_Stream << ref->RecordId();
+		if (ref->RecordId() == 6305) {
+			printf("hello");
+		}
 		p_Stream << "\t";
 		p_Stream << refrecordname;
 		p_Stream << "\t";
@@ -248,18 +253,26 @@ TCluster::Save(std::ostream & p_Stream, uint32_t p_FieldNamePos, uint32_t p_TabN
 		p_Stream << "\t";
 		p_Stream << suggestedname;
 		p_Stream << "\t";
+		p_ClusterIndex = p_ClusterIndex + 1;
+		p_Stream << std::to_string(p_ClusterIndex);
+		p_Stream << "\t";
+		p_Stream << to_string(m_Comparisons.size() + 1);
+		p_Stream << "\t";
 		p_Stream << p_Extension;
 		p_Stream << "\r\n";
+		
 		if (m_Comparisons.size() > 0) {
 			for (const TComparison & comp : m_Comparisons) {
 				uint32_t s = comp.SrceIdx();
 				TNFieldBase * srce = m_ClusterDB->m_Sequences[s];
 				p_Stream << srce->RecordId();
+				if (srce->RecordId() == 6305) {
+					printf("hello");
+				}
 				p_Stream << "\t";
 				std::string recordname = m_ClusterDB->m_Sequences[s]->RecordName();
 				p_Stream << recordname;
 				p_Stream << "\t";
-				uint32_t clusterindex = 0;
 				/*if (refrecordname == recordname) {
 					clusterindex = refclusterindex;
 				}
@@ -271,15 +284,56 @@ TCluster::Save(std::ostream & p_Stream, uint32_t p_FieldNamePos, uint32_t p_TabN
 				p_Stream << "\t";
 				p_Stream << suggestedname;
 				p_Stream << "\t";
+				p_Stream << std::to_string(p_ClusterIndex);
+				p_Stream << "\t";
+				p_Stream << to_string(m_Comparisons.size() + 1);
+				p_Stream << "\t";
 				p_Stream << p_Extension;
 				p_Stream << "\r\n";		
 			}
 		}
 	}
+}
 
+//	Save into a UTF-8 file
+void
+TCluster::SaveAsFastaFiles(const wchar_t * p_DestFilePath, uint32_t &p_ClusterIndex) const
+{
+	if (m_Groups.size() > 0) {
+		//recursively
+		for (TCluster group : m_Groups) {
+			group.SaveAsFastaFiles(p_DestFilePath, p_ClusterIndex);
+		}
+	}
+	else {
+		p_ClusterIndex = p_ClusterIndex + 1;
+		string s = std::to_string(p_ClusterIndex);
+		CString filename = (CString)(p_DestFilePath) + L"\\" +  s.c_str() + L".fas";
+		//	Save results into a cluster file
+		std::ofstream p_Stream(filename, std::ofstream::binary);
 
-
-	
+		//	extend the record name with the centralidx of the clusters that the sequence belongs to.
+		//TNFieldBase * ref = ClusterDatabase()->m_Sequences[CentralSeqIdx()];
+		std::string recordname = m_ClusterDB->m_Sequences[CentralSeqIdx()]->RecordName();
+		std::string sequence = m_ClusterDB->m_Sequences[CentralSeqIdx()]->Sequence();
+		p_Stream << ">" + recordname;
+		p_Stream << "\r\n";
+		p_Stream << sequence;
+		p_Stream << "\r\n";
+		if (m_Comparisons.size() > 0) {
+			for (const TComparison & comp : m_Comparisons) {
+				uint32_t s = comp.SrceIdx();
+				//TNFieldBase * srce = m_ClusterDB->m_Sequences[s];
+				recordname = m_ClusterDB->m_Sequences[s]->RecordName();
+				sequence = m_ClusterDB->m_Sequences[s]->Sequence();
+				p_Stream << ">" + recordname;
+				p_Stream << "\r\n";
+				p_Stream << sequence;
+				p_Stream << "\r\n";
+			}
+		}
+		p_Stream.close();
+	}
 }
 
 void
@@ -332,6 +386,7 @@ TCluster::Save(std::wostringstream & p_Stream, uint32_t p_TabNo) const
 }
 
 
+
 //	Save into a UTF-8 file
 bool
 TCluster::SaveAsText(const wchar_t * p_DestFilePath, uint32_t p_FieldNamePos, uint32_t p_MaxTabNo ) const
@@ -341,17 +396,28 @@ TCluster::SaveAsText(const wchar_t * p_DestFilePath, uint32_t p_FieldNamePos, ui
 	if (file.fail()) {
 		return true; //	error
 	}
-	file << "Sequence id" << "\t" << "Sequence name" << "\t"  << "Reference name" << "\t" << "Suggested name" << "\t";
+	file << "Sequence id" << "\t" << "Sequence name" << "\t"  << "Reference name" << "\t" << "Suggested name" << "\t" << "Cluster index" << "\t" << "Number of sequences in the cluster" << "\t" ;
 	for (uint32_t i = 0; i < p_MaxTabNo ; ++i) {
 		file << "Level" << " " << i + 1 << "\t";
 	}
 	file << "\r\n";
+	uint32_t clusterindex = 0;
 	for (const TCluster & group : m_Groups) {
-		group.Save(file, p_FieldNamePos, 0, p_MaxTabNo,"");
+		group.Save(file, p_FieldNamePos, 0, p_MaxTabNo,"",clusterindex);
 	}
 	bool isError = (file.goodbit != 0);
 	file.close();
 	return isError;
+}
+
+//	Save into a UTF-8 file
+void
+TCluster::SaveAsFastaFiles(const wchar_t * p_DestFilePath)
+{
+	uint32_t clusterindex = 0;
+	for (const TCluster & group : m_Groups) {
+		group.SaveAsFastaFiles(p_DestFilePath, clusterindex);
+	}
 }
 
 //	seems to fails if stream size > 16 kB

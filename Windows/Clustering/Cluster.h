@@ -21,7 +21,9 @@ public:
 	//	saving and displaying
 
 	bool SaveAsText(const wchar_t * p_DestFilePath, uint32_t p_FieldNamePos,uint32_t p_MaxTabNo ) const;
-	void Save(std::ostream & p_Stream, uint32_t p_FieldNamePos, uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string  p_Extension) const;
+	void SaveAsFastaFiles(const wchar_t * p_DestFilePath);
+	void Save(std::ostream & p_Stream, uint32_t p_FieldNamePos, uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string  p_Extension, uint32_t & p_ClusterIndex) const;
+	void SaveAsFastaFiles(const wchar_t * p_DestFilePath, uint32_t & p_ClusterIndex) const;
 	void Save(std::wostringstream & p_Stream, uint32_t p_TabNo) const;
 	void ExtendRecordNames( uint32_t p_TabNo, uint32_t p_MaxTabNo, std::string p_Extension, uint32_t p_FieldNamePos) const;
 	

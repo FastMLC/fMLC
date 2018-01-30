@@ -145,7 +145,8 @@ namespace clustering
 
 			if (line[0] == '>') //	a new sequence name
 			{
-				if (seqName.length() > 0 && sequence.length() > 0) {
+				//if (seqName.length() > 0 && sequence.length() > 0) {
+				if (sequence.length() > 0) {
 					//	save the already loaded sequence
 					TNFieldBase * p_sequence = NFieldFactory(p_IsDna, sequenceId, seqHeader, sequence.c_str());
 					p_Sequences.push_back(p_sequence);
@@ -163,6 +164,7 @@ namespace clustering
 					line.erase(line.begin(), line.begin() + 1) ;
 				}
 				sequenceId = StrainId(line);
+				//sequenceId = sequenceId + 1;
 				seqName = StrainName(line, p_NamePos) ;
 				seqHeader = line;
 			}
@@ -172,11 +174,16 @@ namespace clustering
 		} //	read next row from file
 
 		//	save the last sequence
-		if (seqName.length() > 0 && sequence.length() > 0) {
+		//if (seqName.length() > 0 && sequence.length() > 0) {
+		if (sequence.length() > 0) {
 			TNFieldBase * p_sequence = NFieldFactory(p_IsDna, sequenceId, seqHeader, sequence.c_str());
 			p_Sequences.push_back(p_sequence);
 			//p_Sequences.push_back(NFieldFactory(p_IsDna, sequenceId, seqName, sequence.c_str()));	//	allocation of the sequence, dont forget to delete it when finished
 			sequence.clear();
+		}
+		else {
+			file.close();
+			return (1) ;
 		}
 		file.close() ;
 		return (0) ; //	no error
@@ -188,10 +195,13 @@ namespace clustering
 	{
 		uint32_t id = 0;
 		const char * ptr = srce.c_str();
-		if(*ptr == '>') {
+		/*if(*ptr == '>') {
 			++ptr;
-		}
+		}*/
 		char c = *ptr;
+		while (!(c >= '0' && c <= '9')) {
+			c = *(++ptr);
+		}
 		while(c >= '0' && c <= '9') {
 			id = id * 10 + (c - '0');
 			c = *(++ptr);
